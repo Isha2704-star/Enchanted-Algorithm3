@@ -1,1036 +1,896 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityServe – City Services App</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --blue:        #1A56DB;
-      --blue-light:  #DBEAFE;
-      --blue-dark:   #1340A8;
-      --amber:       #D97706;
-      --amber-light: #FEF3C7;
-      --green:       #16A34A;
-      --green-light: #F0FDF4;
-      --red:         #EF4444;
-      --gray-50:     #F9FAFB;
-      --gray-100:    #F3F4F6;
-      --gray-200:    #E5E7EB;
-      --gray-400:    #9CA3AF;
-      --gray-500:    #6B7280;
-      --gray-700:    #374151;
-      --gray-900:    #111827;
-      --shadow-md:   0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #EFF6FF;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 2rem 1rem;
-    }
-
-    /* ── Phone shell ── */
-    .phone {
-      width: 375px;
-      height: 780px;
-      border-radius: 36px;
-      overflow: hidden;
-      box-shadow: 0 24px 60px rgba(26,86,219,0.18), 0 4px 16px rgba(0,0,0,0.1);
-      border: 6px solid #fff;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    /* ── Toast ── */
-    #toast {
-      position: absolute;
-      top: 16px; left: 50%;
-      transform: translateX(-50%) translateY(-80px);
-      background: var(--gray-900);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 20px;
-      white-space: nowrap;
-      z-index: 999;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      pointer-events: none;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* ── Header ── */
-    .header { background: var(--blue); padding: 16px 18px 0; flex-shrink: 0; }
-    .header-top {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 14px;
-    }
-    .logo { display: flex; align-items: center; gap: 8px; }
-    .logo-icon {
-      width: 32px; height: 32px; border-radius: 10px;
-      background: rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-    .header-icons { display: flex; align-items: center; gap: 16px; }
-    .header-icons svg { cursor: pointer; opacity: 0.9; }
-    .header-icons svg:hover { opacity: 1; }
-
-    /* ── Search ── */
-    .search-wrap { background: var(--blue); padding: 0 16px 16px; flex-shrink: 0; }
-    .search-bar {
-      background: #fff; border-radius: 14px;
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    }
-    .search-bar input {
-      border: none; outline: none; font-family: inherit;
-      font-size: 14px; color: var(--gray-700); flex: 1; background: transparent;
-    }
-    .search-bar input::placeholder { color: var(--gray-400); }
-
-    /* ── Location ── */
-    .location-bar {
-      display: flex; align-items: center; gap: 6px;
-      padding: 12px 18px 10px;
-      border-bottom: 1px solid var(--gray-100); flex-shrink: 0;
-    }
-    .location-bar span { font-size: 13px; color: var(--gray-500); }
-    .location-bar strong { font-size: 13px; color: var(--blue); font-weight: 600; }
-
-    /* ── Screens ── */
-    .screen { display: none; flex-direction: column; overflow-y: auto; flex: 1; }
-    .screen.active { display: flex; }
-
-    /* ── Custom scrollbar (screen) ── */
-    .screen::-webkit-scrollbar { width: 4px; }
-    .screen::-webkit-scrollbar-track { background: transparent; }
-    .screen::-webkit-scrollbar-thumb {
-      background: #BFDBFE;
-      border-radius: 99px;
-    }
-    .screen::-webkit-scrollbar-thumb:hover { background: #93C5FD; }
-    .screen { scrollbar-width: thin; scrollbar-color: #BFDBFE transparent; }
-
-    /* ── Categories ── */
-    .section { padding: 14px 16px 10px; }
-    .section-label {
-      font-size: 11px; font-weight: 600; color: var(--gray-400);
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
-    }
-    .cats {
-      display: flex; gap: 8px;
-      overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;
-    }
-    .cats::-webkit-scrollbar { display: none; }
-    .cat-pill {
-      flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
-      cursor: pointer; border: 1.5px solid transparent;
-      transition: all 0.18s ease; user-select: none;
-    }
-    .cat-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .cat-pill:not(.active) { background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200); }
-    .cat-pill:not(.active):hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue-light); }
-    .cat-emoji { font-size: 15px; line-height: 1; }
-
-    /* ── Map strip ── */
-    .map-strip {
-      margin: 0 16px 4px; border-radius: 16px; overflow: hidden;
-      position: relative; height: 96px;
-      background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 60%,#93c5fd 100%);
-      cursor: pointer; flex-shrink: 0;
-    }
-    .map-strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .map-btn {
-      position: absolute; bottom: 8px; left: 8px;
-      background: var(--blue); color: #fff;
-      font-size: 11px; font-weight: 600; padding: 5px 12px;
-      border-radius: 8px; border: none; cursor: pointer;
-      font-family: inherit; transition: background 0.15s;
-    }
-    .map-btn:hover { background: var(--blue-dark); }
-
-    /* ── Nearby header ── */
-    .nearby-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px 10px;
-    }
-    .nearby-header h2 { font-size: 15px; font-weight: 600; color: var(--gray-900); }
-    .see-all { font-size: 12px; color: var(--blue); font-weight: 500; cursor: pointer; text-decoration: none; }
-
-    /* ── Cards ── */
-    .cards { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
-    .card {
-      background: #fff; border: 1px solid var(--gray-200);
-      border-radius: 16px; padding: 14px;
-      display: flex; align-items: center; gap: 12px;
-      transition: box-shadow 0.18s, transform 0.18s; cursor: pointer;
-    }
-    .card.hidden { display: none; }
-    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .card-icon {
-      width: 48px; height: 48px; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .card-info { flex: 1; min-width: 0; }
-    .card-name { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
-    .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-    .stars { display: flex; gap: 1px; font-size: 12px; }
-    .star-fill { color: #FBBF24; }
-    .star-empty { color: #D1D5DB; }
-    .card-dist { font-size: 11px; color: var(--gray-500); font-weight: 500; }
-    .card-sub { font-size: 11px; color: var(--gray-400); }
-    .no-results {
-      text-align: center; padding: 28px 16px;
-      color: var(--gray-400); font-size: 14px; display: none;
-    }
-    .no-results.show { display: block; }
-
-    /* ── Call button ── */
-    .btn-call {
-      border: none; border-radius: 10px; padding: 9px 13px;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      font-family: inherit; white-space: nowrap;
-      transition: opacity 0.15s, transform 0.1s;
-      text-decoration: none; display: inline-block; text-align: center;
-    }
-    .btn-call:hover { opacity: 0.88; }
-    .btn-call:active { transform: scale(0.96); }
-    .btn-call.primary { background: var(--blue); color: #fff; }
-    .btn-call.secondary { background: #fff; color: var(--blue); border: 1.5px solid var(--blue); }
-    .btn-call.green { background: var(--green); color: #fff; }
-
-    /* ── Badge ── */
-    .badge {
-      display: inline-flex; align-items: center;
-      padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600;
-    }
-    .badge.verified { background: #D1FAE5; color: #065F46; }
-
-    /* ── Bookings screen ── */
-    .bookings-empty {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 40px 24px; gap: 12px; text-align: center;
-    }
-    .bookings-empty .icon-wrap {
-      width: 72px; height: 72px; border-radius: 20px;
-      background: var(--blue-light);
-      display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
-    }
-    .bookings-empty h3 { font-size: 16px; font-weight: 600; color: var(--gray-900); }
-    .bookings-empty p { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
-    .btn-explore {
-      margin-top: 8px; background: var(--blue); color: #fff;
-      border: none; border-radius: 12px; padding: 10px 24px;
-      font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
-      transition: background 0.15s;
-    }
-    .btn-explore:hover { background: var(--blue-dark); }
-
-    /* ── Bottom nav ── */
-    .bottom-nav { border-top: 1px solid var(--gray-200); display: flex; flex-shrink: 0; }
-    .nav-tab {
-      flex: 1; padding: 12px 0;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 4px;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .nav-tab.active { background: #EFF6FF; }
-    .nav-tab:not(.active):hover { background: var(--gray-50); }
-    .nav-label { font-size: 11px; font-weight: 500; }
-    .nav-tab.active .nav-label { color: var(--blue); }
-    .nav-tab:not(.active) .nav-label { color: var(--gray-400); }
-
-    /* ── Reviews screen ── */
-    .reviews-screen { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-
-    /* Service selector */
-    .service-select-wrap { display: flex; flex-direction: column; gap: 6px; }
-    .service-select-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
-    .service-select {
-      width: 100%; padding: 10px 12px;
-      border: 1px solid var(--gray-200); border-radius: 12px;
-      font-family: inherit; font-size: 13px; color: var(--gray-700);
-      background: var(--gray-50); outline: none; cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 12px center;
-    }
-    .service-select:focus { border-color: var(--blue); background-color: #fff; }
-
-    /* Star rating input */
-    .star-input-wrap { display: flex; flex-direction: column; gap: 8px; }
-    .star-input-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
-    .star-row { display: flex; gap: 6px; align-items: center; }
-    .star-btn {
-      font-size: 28px; cursor: pointer; color: #D1D5DB;
-      transition: color 0.15s, transform 0.1s; background: none; border: none; padding: 0; line-height: 1;
-    }
-    .star-btn.lit { color: #FBBF24; }
-    .star-btn:hover { transform: scale(1.15); }
-    .rating-label { font-size: 12px; color: var(--gray-500); margin-left: 6px; font-weight: 500; }
-
-    /* Text area */
-    .review-textarea-wrap { display: flex; flex-direction: column; gap: 6px; }
-    .review-textarea-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
-    .review-textarea {
-      width: 100%; border: 1px solid var(--gray-200); border-radius: 12px;
-      padding: 10px 12px; font-family: inherit; font-size: 13px;
-      color: var(--gray-700); resize: none; outline: none;
-      background: var(--gray-50); line-height: 1.6;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .review-textarea:focus { border-color: var(--blue); background: #fff; }
-    .review-textarea::placeholder { color: var(--gray-400); }
-    .char-count { font-size: 11px; color: var(--gray-400); text-align: right; }
-
-    /* Submit button */
-    .btn-submit {
-      width: 100%; padding: 12px; border: none; border-radius: 14px;
-      background: var(--blue); color: #fff;
-      font-family: inherit; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: background 0.15s, transform 0.1s;
-    }
-    .btn-submit:hover { background: var(--blue-dark); }
-    .btn-submit:active { transform: scale(0.98); }
-    .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; transform: none; }
-
-    /* Divider */
-    .divider {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--gray-200);
-    }
-    .divider span { font-size: 11px; color: var(--gray-400); font-weight: 500; white-space: nowrap; }
-
-    /* Existing review cards */
-    .review-card {
-      background: var(--gray-50); border: 1px solid var(--gray-200);
-      border-radius: 14px; padding: 12px 14px;
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .review-card-header { display: flex; align-items: center; gap: 10px; }
-    .reviewer-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; flex-shrink: 0;
-    }
-    .reviewer-info { flex: 1; min-width: 0; }
-    .reviewer-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
-    .reviewer-meta { font-size: 11px; color: var(--gray-400); }
-    .review-stars { font-size: 12px; color: #FBBF24; letter-spacing: 1px; }
-    .review-service-tag {
-      font-size: 10px; font-weight: 600; background: var(--blue-light);
-      color: var(--blue); padding: 2px 8px; border-radius: 20px; white-space: nowrap;
-    }
-    .review-text { font-size: 13px; color: var(--gray-700); line-height: 1.6; }
-
-    /* New review highlight */
-    .review-card.new-review {
-      border-color: #86EFAC; background: #F0FDF4;
-      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    @keyframes popIn {
-      from { opacity: 0; transform: translateY(10px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* Section heading */
-    .reviews-section-title {
-      font-size: 13px; font-weight: 600; color: var(--gray-700);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .reviews-count { font-size: 11px; color: var(--gray-400); font-weight: 500; }
-  /* ── Sidebar menu ── */
-.sidebar {
-  position: absolute;
-  top: 0;
-  right: -260px;
-  width: 260px;
-  height: 100%;
-  background: #fff;
-  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
-  z-index: 1000;
-  transition: right 0.3s ease;
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CityServe</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#3b5bdb;--blue-dark:#2f4ac2;--blue-light:#e8f0fe;
+  --green:#0ca678;--green-light:#e6fcf5;
+  --orange:#e67700;--orange-light:#fff3e0;
+  --pink:#e64980;--pink-light:#fff0f6;
+  --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
+  --text:#1e293b;--white:#fff;
+  --radius:16px;--shadow:0 4px 24px rgba(0,0,0,.08);
 }
-
-.sidebar.open {
-  right: 0;
-}
-
-.sidebar-content {
-  padding: 20px;
-}
-
-.sidebar-content h3 {
-  margin-bottom: 20px;
-  color: #111827;
-}
-
-.menu-item {
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.menu-item:hover {
-  background: #F3F4F6;
-}
-
-/* Overlay */
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  z-index: 999;
-}
-
-.overlay.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-  </style>
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#eef2ff;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.phone-wrap{width:375px;height:812px;background:var(--white);border-radius:40px;overflow:hidden;position:relative;box-shadow:0 32px 80px rgba(59,91,219,.25)}
+ 
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:#f8fafc;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden;z-index:1}
+.screen.active{transform:translateX(0);z-index:2}
+.screen.slide-left{transform:translateX(-100%)}
+ 
+/* ── HEADER ── */
+.header{background:var(--blue);padding:52px 20px 20px;color:var(--white);flex-shrink:0}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;letter-spacing:-.3px}
+.logo-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.header-actions{display:flex;gap:10px}
+.icon-btn{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.icon-btn:active{transform:scale(.93)}
+ 
+/* ── SEARCH ── */
+.search-bar{margin-top:14px;background:rgba(255,255,255,.15);border-radius:14px;padding:0 14px;display:flex;align-items:center;gap:10px;height:44px}
+.search-bar input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:inherit}
+.search-bar input::placeholder{color:rgba(255,255,255,.65)}
+.search-bar .mic{font-size:18px;cursor:pointer}
+ 
+/* ── LOCATION ── */
+.location-bar{padding:10px 20px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600);background:var(--white);border-bottom:1px solid var(--gray-100)}
+.loc-dot{color:#e53e3e;font-size:14px}
+.loc-city{color:var(--blue);font-weight:600;cursor:pointer}
+ 
+/* ── SCROLL BODY ── */
+.body{flex:1;overflow-y:auto;padding-bottom:80px}
+.body::-webkit-scrollbar{display:none}
+ 
+/* ── CATEGORIES ── */
+.section-label{font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--gray-400);text-transform:uppercase;padding:16px 20px 8px}
+.cats{display:flex;gap:8px;padding:0 20px 4px;overflow-x:auto}
+.cats::-webkit-scrollbar{display:none}
+.cat-chip{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--white);color:var(--gray-600);box-shadow:0 2px 8px rgba(0,0,0,.06);transition:.15s}
+.cat-chip.active{background:var(--blue);color:#fff}
+.cat-chip:active{transform:scale(.95)}
+ 
+/* ── MAP ── */
+.map-box{margin:12px 20px;border-radius:var(--radius);overflow:hidden;height:110px;background:linear-gradient(135deg,#c7d2fe 0%,#a5b4fc 100%);position:relative;cursor:pointer}
+.map-dot{width:12px;height:12px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 2px 8px rgba(59,91,219,.4);position:absolute}
+.map-btn{position:absolute;bottom:10px;left:10px;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
+ 
+/* ── SERVICE CARD ── */
+.nearby-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:8px}
+.nearby-title{font-size:16px;font-weight:700;color:var(--text)}
+.see-all{font-size:13px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none;background:none;border:none;font-family:inherit}
+ 
+.svc-card{background:var(--white);margin:0 20px 10px;border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;border:1.5px solid transparent}
+.svc-card:active{transform:scale(.98);border-color:var(--blue-light)}
+.svc-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.svc-info{flex:1;min-width:0}
+.svc-name-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.svc-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-verified{background:#e6fcf5;color:#0ca678;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:flex;align-items:center;gap:3px;flex-shrink:0}
+.stars{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gray-600);margin-bottom:2px}
+.star-filled{color:#f59e0b}
+.svc-tagline{font-size:12px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call-btn{padding:8px 14px;border-radius:10px;border:1.5px solid var(--blue);background:var(--white);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;transition:.15s}
+.call-btn.filled{background:var(--green);border-color:var(--green);color:#fff}
+.call-btn:active{transform:scale(.95)}
+ 
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:70px;background:var(--white);border-top:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-around;padding:0 10px;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:10}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;transition:.15s;background:none;border:none;font-family:inherit}
+.nav-item:active{background:var(--blue-light)}
+.nav-icon{font-size:20px}
+.nav-label{font-size:10px;font-weight:600;color:var(--gray-400)}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 0 var(--blue))}
+.nav-item.active .nav-label{color:var(--blue)}
+ 
+/* ── SERVICE DETAIL ── */
+.detail-header{height:220px;position:relative;flex-shrink:0;background:linear-gradient(135deg,#e8f0fe,#c7d2fe)}
+.detail-cover{width:100%;height:100%;object-fit:cover;display:block}
+.detail-back{position:absolute;top:48px;left:16px;width:36px;height:36px;background:rgba(255,255,255,.9);border-radius:12px;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.detail-fav{position:absolute;top:48px;right:16px;width:36px;height:36px;background:rgba(255,255,255,.9);border-radius:12px;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+ 
+.detail-card{margin:-20px 16px 0;background:#fff;border-radius:20px;padding:16px;box-shadow:var(--shadow);position:relative;z-index:2}
+.detail-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.detail-name{font-size:18px;font-weight:800;color:var(--text);line-height:1.2}
+.detail-open{background:var(--green-light);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;flex-shrink:0}
+.detail-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.detail-meta-item{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gray-600);font-weight:500}
+ 
+.detail-tabs{display:flex;border-bottom:1.5px solid var(--gray-100);margin:16px 0 0;overflow-x:auto}
+.detail-tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--gray-400);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+ 
+.tab-panel{display:none;padding:16px 16px 0}
+.tab-panel.active{display:block}
+ 
+/* about */
+.about-text{font-size:13px;line-height:1.7;color:var(--gray-600)}
+.info-list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.info-row{display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.info-val{color:var(--gray-600);line-height:1.5}
+ 
+.services-list{display:flex;flex-direction:column;gap:8px}
+.svc-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--gray-50);border-radius:10px;font-size:13px}
+.svc-item-name{font-weight:600;color:var(--text)}
+.svc-item-price{color:var(--blue);font-weight:700}
+ 
+/* reviews */
+.review-summary{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:14px;background:var(--blue-light);border-radius:14px}
+.review-score{font-size:40px;font-weight:800;color:var(--blue);line-height:1}
+.review-bars{flex:1}
+.rbar-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.rbar-label{font-size:11px;color:var(--gray-600);width:12px;text-align:right}
+.rbar-track{flex:1;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden}
+.rbar-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .5s}
+.rbar-count{font-size:11px;color:var(--gray-400);width:20px}
+ 
+.review-card{padding:12px 0;border-bottom:1px solid var(--gray-100)}
+.review-card:last-child{border-bottom:none}
+.rv-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rv-avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rv-name{font-size:13px;font-weight:700;color:var(--text)}
+.rv-date{font-size:11px;color:var(--gray-400)}
+.rv-text{font-size:13px;color:var(--gray-600);line-height:1.6}
+ 
+.add-review-btn{width:100%;padding:12px;border:1.5px dashed var(--blue);border-radius:12px;background:none;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;transition:.15s}
+.add-review-btn:active{background:var(--blue-light)}
+ 
+/* photos */
+.photos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.photo-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:pointer;transition:.15s}
+.photo-img:active{transform:scale(.97)}
+ 
+/* call bar */
+.call-bar{padding:12px 16px;border-top:1px solid var(--gray-100);display:flex;gap:10px;background:#fff;flex-shrink:0}
+.call-bar-btn{flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.call-bar-btn.primary{background:var(--blue);color:#fff}
+.call-bar-btn.secondary{background:var(--green-light);color:var(--green)}
+.call-bar-btn:active{transform:scale(.97)}
+ 
+/* ── PROFILE SCREEN ── */
+.profile-header{background:var(--blue);padding:52px 20px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0}
+.profile-avatar{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.4);object-fit:cover}
+.profile-name{font-size:20px;font-weight:800;color:#fff}
+.profile-email{font-size:13px;color:rgba(255,255,255,.75)}
+.profile-loc{font-size:12px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px}
+.edit-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
+ 
+.profile-stats{display:flex;background:#fff;margin:12px 20px;border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat-item{flex:1;padding:14px;display:flex;flex-direction:column;align-items:center;gap:2px;border-right:1px solid var(--gray-100)}
+.stat-item:last-child{border-right:none}
+.stat-val{font-size:20px;font-weight:800;color:var(--blue)}
+.stat-lbl{font-size:11px;color:var(--gray-400);font-weight:600;text-align:center}
+ 
+.profile-section{background:#fff;margin:0 20px 10px;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.ps-title{font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:.6px;text-transform:uppercase;padding:12px 16px 4px}
+.ps-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-100);cursor:pointer;transition:.15s}
+.ps-item:last-child{border-bottom:none}
+.ps-item:active{background:var(--gray-50)}
+.ps-icon{font-size:18px;width:30px;text-align:center}
+.ps-label{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+.ps-arrow{color:var(--gray-400);font-size:14px}
+.ps-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
+ 
+/* ── MENU / DRAWER ── */
+.drawer{position:absolute;top:0;bottom:0;right:0;width:280px;background:#fff;z-index:20;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.15)}
+.drawer.open{transform:translateX(0)}
+.drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:19;opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+.drawer-header{background:var(--blue);padding:52px 20px 24px}
+.drawer-avatar{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,.4);margin-bottom:8px}
+.drawer-name{font-size:16px;font-weight:800;color:#fff}
+.drawer-email{font-size:12px;color:rgba(255,255,255,.7)}
+.drawer-items{padding:10px 0}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:13px 20px;cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.drawer-item:active{background:var(--gray-50)}
+.di-icon{font-size:20px;width:28px;text-align:center}
+.di-label{font-size:14px;font-weight:600;color:var(--text)}
+.drawer-divider{height:1px;background:var(--gray-100);margin:6px 0}
+ 
+/* ── MODAL ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--gray-400);margin-bottom:16px}
+.modal-stars{display:flex;gap:8px;margin-bottom:14px}
+.modal-star{font-size:32px;cursor:pointer;filter:grayscale(1);transition:.1s}
+.modal-star.active{filter:none}
+.modal-textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:12px;padding:12px;font-size:13px;font-family:inherit;resize:none;outline:none;min-height:90px;color:var(--text)}
+.modal-textarea:focus{border-color:var(--blue)}
+.modal-submit{width:100%;margin-top:12px;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.modal-submit:active{transform:scale(.98)}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-400)}
+ 
+/* helper */
+.stars-row{display:flex;align-items:center;gap:2px}
+.s{font-size:12px;color:#e2e8f0}.s.on{color:#f59e0b}
+</style>
 </head>
 <body>
-
-<div class="phone">
-
-  <!-- Toast -->
-  <div id="toast"></div>
-
-  <div id="sidebar" class="sidebar">
-  <div class="sidebar-content">
-    <h3>Menu</h3>
-
-    <div class="menu-item" onclick="switchTab('home'); closeMenu()">🏠 Home</div>
-    <div class="menu-item" onclick="switchTab('reviews'); closeMenu()">⭐ Reviews</div>
-    <div class="menu-item" onclick="switchTab('bookings'); closeMenu()">📅 Bookings</div>
-
-    <div class="menu-item" onclick="showToast('Profile coming soon!')">👤 Profile</div>
-    <div class="menu-item" onclick="showToast('Settings coming soon!')">⚙ Settings</div>
-  </div>
-</div>
-<!-- Overlay -->
-<div id="overlay" class="overlay" onclick="closeMenu()"></div>
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-top">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/>
-            <path d="M5 8.5L7 10.5L11 6.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="logo-text">CityServe</span>
-      </div>
-      <div class="header-icons">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" onclick="showToast('Profile coming soon!')">
-          <circle cx="11" cy="8" r="3.5" stroke="white" stroke-width="1.5"/>
-          <path d="M3.5 19c0-4.142 3.358-7.5 7.5-7.5s7.5 3.358 7.5 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" onclick="showToast('Menu opening...')">
-          <rect x="3" y="6" width="16" height="1.6" rx="0.8" fill="white"/>
-          <rect x="3" y="10.2" width="16" height="1.6" rx="0.8" fill="white"/>
-          <rect x="3" y="14.4" width="11" height="1.6" rx="0.8" fill="white"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- SEARCH BAR -->
-  <div class="search-wrap">
-    <div class="search-bar">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="7" cy="7" r="5" stroke="#9CA3AF" stroke-width="1.5"/>
-        <path d="M11 11L14.5 14.5" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <input type="text" id="searchInput" placeholder='Search for "Electrician..."' oninput="filterCards()" />
-      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="cursor:pointer" onclick="showToast('Voice search activated 🎤')">
-        <path d="M8.5 1.5v10M6 4C6 3.172 7.12 2.5 8.5 2.5S11 3.172 11 4v4C11 8.828 9.88 9.5 8.5 9.5S6 8.828 6 8V4z" stroke="#1A56DB" stroke-width="1.4" stroke-linecap="round"/>
-        <path d="M4 9.5a4.5 4.5 0 0 0 9 0" stroke="#1A56DB" stroke-width="1.4" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- LOCATION BAR -->
-  <div class="location-bar">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M7 1C5.07 1 3.5 2.57 3.5 4.5C3.5 7.125 7 13 7 13C7 13 10.5 7.125 10.5 4.5C10.5 2.57 8.93 1 7 1Z" fill="#EF4444"/>
-      <circle cx="7" cy="4.5" r="1.5" fill="white"/>
-    </svg>
-    <span>Current location:</span>
-    <strong>Patna, Bihar</strong>
-  </div>
-
-  <!-- ════════════════════════ -->
-  <!-- HOME SCREEN             -->
-  <!-- ════════════════════════ -->
+<div class="phone-wrap" id="app">
+ 
+  <!-- ══ SCREEN: HOME ══════════════════════════════════════ -->
   <div class="screen active" id="screen-home">
-
-    <div class="section">
-      <p class="section-label">Categories</p>
-      <div class="cats">
-        <div class="cat-pill active" onclick="setCategory(this,'all')"><span class="cat-emoji">✨</span> All</div>
-        <div class="cat-pill" onclick="setCategory(this,'repair')"><span class="cat-emoji">🔧</span> Repair</div>
-        <div class="cat-pill" onclick="setCategory(this,'food')"><span class="cat-emoji">🍱</span> Food</div>
-        <div class="cat-pill" onclick="setCategory(this,'tutors')"><span class="cat-emoji">📚</span> Tutors</div>
-        <div class="cat-pill" onclick="setCategory(this,'cafes')"><span class="cat-emoji">☕</span> Cafes</div>
-        <div class="cat-pill" onclick="setCategory(this,'cleaning')"><span class="cat-emoji">🧹</span> Cleaning</div>
-        <div class="cat-pill" onclick="setCategory(this,'medical')"><span class="cat-emoji">🏥</span> Medical</div>
+    <div class="header">
+      <div class="header-row">
+        <div class="logo"><div class="logo-icon">🏙️</div> CityServe</div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="openDrawer()">☰</button>
+          <button class="icon-btn" onclick="goProfile()">👤</button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <span>🔍</span>
+        <input id="search-input" placeholder='Search for "Electrician..."' oninput="filterServices(this.value)"/>
+        <span class="mic">🎙️</span>
       </div>
     </div>
-
-    <div class="map-strip" onclick="showToast('Opening full map view...')">
-      <svg viewBox="0 0 343 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <line x1="0" y1="34" x2="343" y2="34" stroke="#93c5fd" stroke-width="9"/>
-        <line x1="86" y1="0" x2="86" y2="96" stroke="#93c5fd" stroke-width="6"/>
-        <line x1="210" y1="0" x2="210" y2="96" stroke="#bfdbfe" stroke-width="5"/>
-        <rect x="20" y="42" width="54" height="36" rx="5" fill="#bfdbfe" opacity="0.8"/>
-        <rect x="96" y="42" width="98" height="26" rx="5" fill="#bfdbfe" opacity="0.8"/>
-        <rect x="218" y="42" width="66" height="42" rx="5" fill="#bfdbfe" opacity="0.7"/>
-        <circle cx="160" cy="20" r="12" fill="#1A56DB"/>
-        <circle cx="160" cy="20" r="5" fill="white"/>
-        <circle cx="240" cy="52" r="8" fill="#60A5FA"/>
-        <circle cx="240" cy="52" r="3.5" fill="white"/>
-      </svg>
-      <button class="map-btn">&#9650; Map view</button>
+ 
+    <div class="location-bar">
+      <span class="loc-dot">📍</span> Current location: <span class="loc-city">Patna, Bihar</span>
     </div>
-
-    <div class="nearby-header">
-      <h2>Nearby services</h2>
-      <a class="see-all" href="#" onclick="showToast('Loading all services...');return false;">See all →</a>
+ 
+    <div class="body" id="home-body">
+      <div class="section-label">CATEGORIES</div>
+      <div class="cats" id="cat-list"></div>
+ 
+      <div class="map-box">
+        <div class="map-dot" style="top:55%;left:48%"></div>
+        <div class="map-dot" style="top:38%;left:63%;width:9px;height:9px;background:#0ca678"></div>
+        <button class="map-btn">▲ Map view</button>
+      </div>
+ 
+      <div class="nearby-header">
+        <span class="nearby-title">Nearby services</span>
+        <button class="see-all" onclick="filterServices('')">See all →</button>
+      </div>
+      <div id="svc-list"></div>
     </div>
-
-    <div class="cards" id="cardList">
-
-      <!-- ABC Electrician -->
-      <div class="card" data-name="abc electrician electrical wiring" data-category="repair">
-        <div class="card-icon" style="background:var(--blue-light)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#1A56DB"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <p class="card-name" style="margin:0">ABC Electrician</p>
-            <span class="badge verified">✓ Verified</span>
-          </div>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
-            <span class="card-dist">4.0 · 1.2 km</span>
-          </div>
-          <p class="card-sub">Electrical repairs &amp; wiring</p>
-        </div>
-        <!-- Replace +919876543210 with the real phone number -->
-        <a class="btn-call primary" href="tel:+919876543210">Call now</a>
-      </div>
-
-      <!-- QuickFix Repair -->
-      <div class="card" data-name="quickfix repair appliance home" data-category="repair">
-        <div class="card-icon" style="background:var(--amber-light)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z" stroke="#D97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <p class="card-name">QuickFix Repair</p>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★</span><span class="star-empty">★★</span></div>
-            <span class="card-dist">3.0 · 2.0 km</span>
-          </div>
-          <p class="card-sub">Home appliance repairs</p>
-        </div>
-        <a class="btn-call secondary" href="tel:+919876543211">Call now</a>
-      </div>
-
-      <!-- Sharma Plumbing -->
-      <div class="card" data-name="sharma plumbing pipes leaks drainage" data-category="repair">
-        <div class="card-icon" style="background:var(--green-light)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12h14M12 5l7 7-7 7" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <p class="card-name">Sharma Plumbing</p>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★★</span></div>
-            <span class="card-dist">5.0 · 0.8 km</span>
-          </div>
-          <p class="card-sub">Pipes, leaks &amp; drainage</p>
-        </div>
-        <a class="btn-call green" href="tel:+919876543212">Call now</a>
-      </div>
-
-      <!-- Biryani House -->
-      <div class="card" data-name="biryani house food delivery north indian" data-category="food">
-        <div class="card-icon" style="background:#FFF7ED">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <ellipse cx="12" cy="15" rx="9" ry="3" stroke="#EA580C" stroke-width="1.5"/>
-            <path d="M3 15c0-4 3-8 9-9s9 5 9 9" stroke="#EA580C" stroke-width="1.5"/>
-            <path d="M8 10s1-2 4-2 4 2 4 2" stroke="#EA580C" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <p class="card-name">Biryani House</p>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
-            <span class="card-dist">4.2 · 1.5 km</span>
-          </div>
-          <p class="card-sub">North Indian, Biryani, Kebabs</p>
-        </div>
-        <a class="btn-call primary" style="background:#EA580C" href="tel:+919876543213">Call now</a>
-      </div>
-
-      <!-- Cafe Aroha -->
-      <div class="card" data-name="cafe aroha coffee cafes snacks" data-category="cafes">
-        <div class="card-icon" style="background:#FEF9C3">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M17 8h1a4 4 0 0 1 0 8h-1" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" stroke="#CA8A04" stroke-width="1.5"/>
-            <path d="M6 2v3M10 2v3M14 2v3" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <p class="card-name">Cafe Aroha</p>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
-            <span class="card-dist">4.3 · 0.6 km</span>
-          </div>
-          <p class="card-sub">Specialty coffee &amp; snacks</p>
-        </div>
-        <a class="btn-call primary" style="background:#CA8A04" href="tel:+919876543214">Call now</a>
-      </div>
-
-      <!-- CleanPro -->
-      <div class="card" data-name="cleanpro cleaning home deep sanitisation" data-category="cleaning">
-        <div class="card-icon" style="background:#EDE9FE">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M3 21l5-5M9 15l1-8 5-4 2 2-4 5-1 8" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <p class="card-name">CleanPro Services</p>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
-            <span class="card-dist">4.1 · 1.8 km</span>
-          </div>
-          <p class="card-sub">Deep cleaning &amp; sanitisation</p>
-        </div>
-        <a class="btn-call primary" style="background:#7C3AED" href="tel:+919876543215">Call now</a>
-      </div>
-
-      <!-- MedPoint Clinic -->
-      <div class="card" data-name="medpoint clinic medical doctor health" data-category="medical">
-        <div class="card-icon" style="background:#FEE2E2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" stroke="#DC2626" stroke-width="1.5"/>
-            <path d="M12 8v8M8 12h8" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="card-info">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-            <p class="card-name" style="margin:0">MedPoint Clinic</p>
-            <span class="badge verified">✓ Verified</span>
-          </div>
-          <div class="card-meta">
-            <div class="stars"><span class="star-fill">★★★★★</span></div>
-            <span class="card-dist">5.0 · 0.5 km</span>
-          </div>
-          <p class="card-sub">General physician &amp; diagnostics</p>
-        </div>
-        <a class="btn-call primary" style="background:#DC2626" href="tel:+919876543216">Call now</a>
-      </div>
-
+ 
+    <!-- bottom nav -->
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+      <button class="nav-item" onclick="goBookings()"><span class="nav-icon">📅</span><span class="nav-label">Bookings</span></button>
+      <button class="nav-item" onclick="goSaved()"><span class="nav-icon">❤️</span><span class="nav-label">Saved</span></button>
+      <button class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
     </div>
-
-    <div class="no-results" id="noResults">😕 No services found. Try a different search.</div>
-
-  </div><!-- /screen-home -->
-
-  <!-- ════════════════════════ -->
-  <!-- BOOKINGS SCREEN         -->
-  <!-- ════════════════════════ -->
+  </div>
+ 
+  <!-- ══ SCREEN: SERVICE DETAIL ════════════════════════════ -->
+  <div class="screen" id="screen-detail">
+    <div class="detail-header" id="detail-header">
+      <button class="detail-back" onclick="goBack()">←</button>
+      <button class="detail-fav" id="fav-btn" onclick="toggleFav()">🤍</button>
+    </div>
+ 
+    <div class="detail-card" id="detail-card">
+      <!-- filled by JS -->
+    </div>
+ 
+    <div class="detail-tabs" id="detail-tabs">
+      <button class="tab active" onclick="switchTab(0)">About</button>
+      <button class="tab" onclick="switchTab(1)">Services</button>
+      <button class="tab" onclick="switchTab(2)">Reviews</button>
+      <button class="tab" onclick="switchTab(3)">Photos</button>
+    </div>
+ 
+    <div class="body" style="padding-bottom:90px">
+      <div class="tab-panel active" id="tab-about"></div>
+      <div class="tab-panel" id="tab-services"></div>
+      <div class="tab-panel" id="tab-reviews"></div>
+      <div class="tab-panel" id="tab-photos"></div>
+    </div>
+ 
+    <div class="call-bar" id="call-bar"></div>
+  </div>
+ 
+  <!-- ══ SCREEN: PROFILE ═══════════════════════════════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header">
+      <img class="profile-avatar" id="p-avatar" src="" alt=""/>
+      <div class="profile-name" id="p-name"></div>
+      <div class="profile-email" id="p-email"></div>
+      <div class="profile-loc" id="p-loc"></div>
+      <button class="edit-btn">✏️ Edit Profile</button>
+    </div>
+    <div class="body">
+      <div class="profile-stats">
+        <div class="stat-item"><span class="stat-val" id="st-bookings">0</span><span class="stat-lbl">Bookings</span></div>
+        <div class="stat-item"><span class="stat-val" id="st-saved">0</span><span class="stat-lbl">Saved</span></div>
+        <div class="stat-item"><span class="stat-val" id="st-reviews">0</span><span class="stat-lbl">Reviews</span></div>
+      </div>
+ 
+      <div class="profile-section">
+        <div class="ps-title">Account</div>
+        <div class="ps-item"><span class="ps-icon">📱</span><span class="ps-label" id="p-phone"></span><span class="ps-arrow">›</span></div>
+        <div class="ps-item"><span class="ps-icon">📧</span><span class="ps-label" id="p-email2"></span><span class="ps-arrow">›</span></div>
+        <div class="ps-item"><span class="ps-icon">📍</span><span class="ps-label" id="p-loc2"></span><span class="ps-arrow">›</span></div>
+      </div>
+ 
+      <div class="profile-section">
+        <div class="ps-title">Activity</div>
+        <div class="ps-item" onclick="goBookings()"><span class="ps-icon">📅</span><span class="ps-label">My Bookings</span><span class="ps-badge" id="booking-badge">0</span><span class="ps-arrow">›</span></div>
+        <div class="ps-item" onclick="goSaved()"><span class="ps-icon">❤️</span><span class="ps-label">Saved Services</span><span class="ps-arrow">›</span></div>
+      </div>
+ 
+      <div class="profile-section">
+        <div class="ps-title">Settings</div>
+        <div class="ps-item"><span class="ps-icon">🔔</span><span class="ps-label">Notifications</span><span class="ps-arrow">›</span></div>
+        <div class="ps-item"><span class="ps-icon">🔒</span><span class="ps-label">Privacy & Security</span><span class="ps-arrow">›</span></div>
+        <div class="ps-item"><span class="ps-icon">🌐</span><span class="ps-label">Language</span><span class="ps-arrow">›</span></div>
+        <div class="ps-item"><span class="ps-icon">❓</span><span class="ps-label">Help & Support</span><span class="ps-arrow">›</span></div>
+        <div class="ps-item" style="color:#e53e3e"><span class="ps-icon">🚪</span><span class="ps-label" style="color:#e53e3e">Logout</span><span class="ps-arrow" style="color:#e53e3e">›</span></div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+      <button class="nav-item" onclick="goBookings()"><span class="nav-icon">📅</span><span class="nav-label">Bookings</span></button>
+      <button class="nav-item" onclick="goSaved()"><span class="nav-icon">❤️</span><span class="nav-label">Saved</span></button>
+      <button class="nav-item active" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+    </div>
+    <button style="position:absolute;top:48px;left:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
+  </div>
+ 
+  <!-- ══ SCREEN: BOOKINGS ═══════════════════════════════════ -->
   <div class="screen" id="screen-bookings">
-    <div class="bookings-empty">
-      <div class="icon-wrap">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-          <rect x="5" y="7" width="26" height="26" rx="4" stroke="#1A56DB" stroke-width="2"/>
-          <path d="M12 7V4M24 7V4" stroke="#1A56DB" stroke-width="2" stroke-linecap="round"/>
-          <path d="M5 15H31" stroke="#1A56DB" stroke-width="2"/>
-          <path d="M12 22h5M12 27h9" stroke="#1A56DB" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
+    <div class="header">
+      <div class="header-row">
+        <button style="background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
+        <span style="font-size:18px;font-weight:800;color:#fff">My Bookings</span>
+        <div style="width:36px"></div>
       </div>
-      <h3>No bookings yet</h3>
-      <p>You haven't made any bookings.<br/>Explore services and call to book one.</p>
-      <button class="btn-explore" onclick="switchTab('home')">Explore services</button>
+    </div>
+    <div class="body" id="bookings-body"></div>
+  </div>
+ 
+  <!-- ══ SCREEN: SAVED ══════════════════════════════════════ -->
+  <div class="screen" id="screen-saved">
+    <div class="header">
+      <div class="header-row">
+        <button style="background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
+        <span style="font-size:18px;font-weight:800;color:#fff">Saved Services</span>
+        <div style="width:36px"></div>
+      </div>
+    </div>
+    <div class="body" id="saved-body" style="padding-top:12px"></div>
+  </div>
+ 
+  <!-- ══ DRAWER / MENU ══════════════════════════════════════ -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <img class="drawer-avatar" id="d-avatar" src="" alt=""/>
+      <div class="drawer-name" id="d-name"></div>
+      <div class="drawer-email" id="d-email"></div>
+    </div>
+    <div class="drawer-items" id="drawer-items"></div>
+  </div>
+ 
+  <!-- ══ REVIEW MODAL ═══════════════════════════════════════ -->
+  <div class="modal-overlay" id="review-modal">
+    <div class="modal" style="position:relative">
+      <button class="modal-close" onclick="closeReviewModal()">×</button>
+      <div class="modal-title">Write a Review</div>
+      <div class="modal-sub">Share your experience</div>
+      <div class="modal-stars" id="modal-stars"></div>
+      <textarea class="modal-textarea" id="review-text" placeholder="Tell others what you experienced..."></textarea>
+      <button class="modal-submit" onclick="submitReview()">Submit Review</button>
     </div>
   </div>
-
-  <!-- ════════════════════════ -->
-  <!-- REVIEWS SCREEN          -->
-  <!-- ════════════════════════ -->
-  <div class="screen" id="screen-reviews">
-    <div class="reviews-screen">
-
-      <!-- Write a Review form -->
-      <div style="font-size:15px;font-weight:700;color:var(--gray-900);">Rate &amp; Review</div>
-
-      <!-- Service selector -->
-      <div class="service-select-wrap">
-        <label>Select service</label>
-        <select class="service-select" id="reviewService">
-          <option value="">— Choose a service —</option>
-          <option value="ABC Electrician">ABC Electrician</option>
-          <option value="QuickFix Repair">QuickFix Repair</option>
-          <option value="Sharma Plumbing">Sharma Plumbing</option>
-          <option value="Biryani House">Biryani House</option>
-          <option value="Cafe Aroha">Cafe Aroha</option>
-          <option value="CleanPro Services">CleanPro Services</option>
-          <option value="MedPoint Clinic">MedPoint Clinic</option>
-        </select>
-      </div>
-
-      <!-- Star rating -->
-      <div class="star-input-wrap">
-        <label>Your rating</label>
-        <div class="star-row" id="starRow">
-          <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
-          <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
-          <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
-          <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
-          <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
-          <span class="rating-label" id="ratingLabel">Tap to rate</span>
-        </div>
-      </div>
-
-      <!-- Review text -->
-      <div class="review-textarea-wrap">
-        <label>Your review</label>
-        <textarea class="review-textarea" id="reviewText" rows="4"
-          placeholder="Share your experience — what did you like or dislike?"
-          oninput="onTextInput()"></textarea>
-        <div class="char-count"><span id="charCount">0</span> / 300</div>
-      </div>
-
-      <!-- Submit -->
-      <button class="btn-submit" id="submitBtn" onclick="submitReview()" disabled>Submit review</button>
-
-      <!-- Divider -->
-      <div class="divider"><span>Recent reviews</span></div>
-
-      <!-- Review count line -->
-      <div class="reviews-section-title">
-        Community feedback
-        <span class="reviews-count" id="reviewsCount">4 reviews</span>
-      </div>
-
-      <!-- Existing reviews list -->
-      <div id="reviewsList" style="display:flex;flex-direction:column;gap:10px;">
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <div class="reviewer-avatar" style="background:#DBEAFE;color:#1A56DB">RK</div>
-            <div class="reviewer-info">
-              <div class="reviewer-name">Rahul K.</div>
-              <div class="reviewer-meta">2 days ago</div>
-            </div>
-            <span class="review-stars">★★★★★</span>
-            <span class="review-service-tag">ABC Electrician</span>
-          </div>
-          <p class="review-text">Very professional service. Fixed our wiring issue within an hour. Highly recommend!</p>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <div class="reviewer-avatar" style="background:#FEF3C7;color:#D97706">PM</div>
-            <div class="reviewer-info">
-              <div class="reviewer-name">Priya M.</div>
-              <div class="reviewer-meta">5 days ago</div>
-            </div>
-            <span class="review-stars">★★★★</span>
-            <span class="review-service-tag">Sharma Plumbing</span>
-          </div>
-          <p class="review-text">Came on time and fixed the leak quickly. Reasonable pricing too.</p>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <div class="reviewer-avatar" style="background:#F0FDF4;color:#16A34A">AS</div>
-            <div class="reviewer-info">
-              <div class="reviewer-name">Arjun S.</div>
-              <div class="reviewer-meta">1 week ago</div>
-            </div>
-            <span class="review-stars">★★★</span>
-            <span class="review-service-tag">QuickFix Repair</span>
-          </div>
-          <p class="review-text">Decent service but took longer than expected. Work quality was fine.</p>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <div class="reviewer-avatar" style="background:#EDE9FE;color:#7C3AED">NJ</div>
-            <div class="reviewer-info">
-              <div class="reviewer-name">Neha J.</div>
-              <div class="reviewer-meta">2 weeks ago</div>
-            </div>
-            <span class="review-stars">★★★★★</span>
-            <span class="review-service-tag">CleanPro Services</span>
-          </div>
-          <p class="review-text">Absolutely spotless! The team was thorough and polite. Will definitely book again.</p>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div class="nav-tab active" id="tab-home" onclick="switchTab('home')">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="home-icon">
-        <path d="M3 9.5L10 3L17 9.5V17H13V13H7V17H3V9.5Z" fill="#1A56DB"/>
-      </svg>
-      <span class="nav-label">Home</span>
-    </div>
-    <div class="nav-tab" id="tab-reviews" onclick="switchTab('reviews')">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="reviews-icon">
-        <path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23.83-4.82L3 7.27l4.91-.71L10 2z" stroke="#9CA3AF" stroke-width="1.5" stroke-linejoin="round"/>
-      </svg>
-      <span class="nav-label">Reviews</span>
-    </div>
-    <div class="nav-tab" id="tab-bookings" onclick="switchTab('bookings')">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="bookings-icon">
-        <rect x="3" y="4" width="14" height="14" rx="2" stroke="#9CA3AF" stroke-width="1.5"/>
-        <path d="M7 4V2M13 4V2" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M3 8H17" stroke="#9CA3AF" stroke-width="1.5"/>
-        <path d="M7 12H10M7 15H13" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-      <span class="nav-label">My Bookings</span>
-    </div>
-  </div>
-
-</div><!-- /phone -->
-
+ 
+</div><!-- /phone-wrap -->
+ 
 <script>
-  /* ── Toast ── */
-  let toastTimer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-  }
-
-  /* ── Tab switching ── */
-  function switchTab(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('screen-' + name).classList.add('active');
-    document.getElementById('tab-' + name).classList.add('active');
-
-    // Update icon colours
-    const iconMap = {
-      home:     { el: 'home-icon',     type: 'fill' },
-      reviews:  { el: 'reviews-icon',  type: 'stroke' },
-      bookings: { el: 'bookings-icon', type: 'stroke' }
-    };
-    Object.entries(iconMap).forEach(([tab, cfg]) => {
-      const icon = document.getElementById(cfg.el);
-      if (!icon) return;
-      const active = tab === name;
-      const colour = active ? '#1A56DB' : '#9CA3AF';
-      if (cfg.type === 'fill') {
-        icon.querySelectorAll('[fill]').forEach(el => {
-          if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', colour);
-        });
-      } else {
-        icon.querySelectorAll('[stroke]').forEach(el => {
-          if (el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', colour);
-        });
-        // reviews star: also fill when active
-        if (cfg.el === 'reviews-icon' && active) {
-          icon.querySelectorAll('path').forEach(el => el.setAttribute('fill', '#1A56DB'));
-        } else if (cfg.el === 'reviews-icon') {
-          icon.querySelectorAll('path').forEach(el => el.setAttribute('fill', 'none'));
-        }
-      }
-    });
-  }
-
-  /* ── Category filter ── */
-  let activeCategory = 'all';
-  function setCategory(el, cat) {
-    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    activeCategory = cat;
-    filterCards();
-  }
-
-  /* ── Live search + category filter ── */
-  function filterCards() {
-    const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    let visible = 0;
-    document.querySelectorAll('#cardList .card').forEach(card => {
-      const matchSearch = !q || (card.dataset.name || '').includes(q);
-      const matchCat    = activeCategory === 'all' || card.dataset.category === activeCategory;
-      const show = matchSearch && matchCat;
-      card.classList.toggle('hidden', !show);
-      if (show) visible++;
-    });
-    document.getElementById('noResults').classList.toggle('show', visible === 0);
-  }
-
-  /* ── Star rating ── */
-  let selectedRating = 0;
-  const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
-
-  function setRating(val) {
-    selectedRating = val;
-    document.querySelectorAll('.star-btn').forEach(btn => {
-      btn.classList.toggle('lit', +btn.dataset.val <= val);
-    });
-    document.getElementById('ratingLabel').textContent = ratingLabels[val];
-    checkSubmit();
-  }
-
-  /* ── Char counter & submit guard ── */
-  function onTextInput() {
-    const txt = document.getElementById('reviewText').value;
-    const count = Math.min(txt.length, 300);
-    document.getElementById('charCount').textContent = count;
-    if (txt.length > 300) {
-      document.getElementById('reviewText').value = txt.slice(0, 300);
-      document.getElementById('charCount').textContent = 300;
-    }
-    checkSubmit();
-  }
-
-  function checkSubmit() {
-    const service = document.getElementById('reviewService').value;
-    const text    = document.getElementById('reviewText').value.trim();
-    const ok = service && selectedRating > 0 && text.length >= 10;
-    document.getElementById('submitBtn').disabled = !ok;
-  }
-
-  /* ── Submit review ── */
-  let reviewCount = 4;
-  function submitReview() {
-    const service = document.getElementById('reviewService').value;
-    const text    = document.getElementById('reviewText').value.trim();
-    const stars   = '★'.repeat(selectedRating) + '☆'.repeat(5 - selectedRating);
-    const colors  = ['#DBEAFE:#1A56DB','#FEF3C7:#D97706','#F0FDF4:#16A34A','#EDE9FE:#7C3AED','#FEE2E2:#DC2626'];
-    const [bg, fg] = colors[reviewCount % colors.length].split(':');
-    const initials = 'You';
-
-    const card = document.createElement('div');
-    card.className = 'review-card new-review';
-    card.innerHTML = `
-      <div class="review-card-header">
-        <div class="reviewer-avatar" style="background:${bg};color:${fg}">${initials}</div>
-        <div class="reviewer-info">
-          <div class="reviewer-name">You</div>
-          <div class="reviewer-meta">Just now</div>
-        </div>
-        <span class="review-stars">${stars.replace(/☆/g,'<span style="color:#D1D5DB">☆</span>')}</span>
-        <span class="review-service-tag">${service}</span>
+// ════════════════════════════════════════════════
+//  BACKEND DATA (inline — same as cityserve-backend.js)
+// ════════════════════════════════════════════════
+const DB = {
+  user: {
+    id:"usr_001",name:"Rahul Sharma",email:"rahul.sharma@email.com",
+    phone:"+91 98765 43210",
+    avatar:"https://ui-avatars.com/api/?name=Rahul+Sharma&background=3b5bdb&color=fff&size=200",
+    location:{city:"Patna",state:"Bihar"},
+    savedServices:["svc_001","svc_003"],
+    bookings:["bkg_001","bkg_002"],verified:true
+  },
+  menuItems:[
+    {id:"mn_01",label:"My Profile",   icon:"👤",action:"goProfile"},
+    {id:"mn_02",label:"My Bookings",  icon:"📅",action:"goBookings"},
+    {id:"mn_03",label:"Saved",        icon:"❤️", action:"goSaved"},
+    {id:"mn_04",label:"Notifications",icon:"🔔",action:null},
+    {id:"mn_05",label:"Payments",     icon:"💳",action:null},
+    {id:"mn_06",label:"Help & Support",icon:"🛟",action:null},
+    {id:"mn_07",label:"Settings",     icon:"⚙️", action:null},
+    {id:"mn_08",label:"Logout",       icon:"🚪",action:null},
+  ],
+  categories:[
+    {id:"cat_all",label:"All",emoji:"✨"},
+    {id:"cat_repair",label:"Repair",emoji:"🔧"},
+    {id:"cat_food",label:"Food",emoji:"🍕"},
+    {id:"cat_clean",label:"Cleaning",emoji:"🧹"},
+    {id:"cat_beauty",label:"Beauty",emoji:"💅"},
+  ],
+  services:[
+    {
+      id:"svc_001",name:"ABC Electrician",category:"cat_repair",
+      tagline:"Electrical repairs & wiring",
+      description:"ABC Electrician has been serving Patna since 2015. We specialise in residential and commercial electrical work — from simple socket repairs to full house wiring, MCB fitting, inverter installation, and CCTV wiring. All our technicians are ITI-certified and carry genuine spare parts.",
+      rating:4.0,reviewCount:128,distance:1.2,verified:true,
+      phone:"+91 87654 32109",whatsapp:"+91 87654 32109",
+      address:"Shop 12, Boring Road, Patna, Bihar 800001",
+      openNow:true,hours:"Mon–Sat 8 AM – 8 PM, Sun 9 AM – 5 PM",
+      priceRange:"₹200 – ₹5,000",icon:"⚡",iconBg:"#e8f0fe",iconColor:"#3b5bdb",
+      photos:[
+        "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80",
+        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80",
+      ],
+      services:[
+        {name:"Wiring & Rewiring",price:"₹500 onwards"},
+        {name:"Socket / Switch Repair",price:"₹200"},
+        {name:"MCB / Fuse Box",price:"₹350"},
+        {name:"Inverter Installation",price:"₹800"},
+        {name:"Fan Installation",price:"₹250"},
+        {name:"CCTV Wiring",price:"₹1,200 onwards"},
+      ],
+      reviews:[
+        {id:"rv_01",user:"Priya M.",avatar:"PM",rating:5,date:"2026-03-20",text:"Excellent work! Fixed our wiring issue in under an hour. Very professional."},
+        {id:"rv_02",user:"Anil K.",avatar:"AK",rating:4,date:"2026-02-14",text:"Good service. A bit late but the work quality was great."},
+        {id:"rv_03",user:"Sunita R.",avatar:"SR",rating:4,date:"2026-01-30",text:"Reasonable price and quick turnaround. Will use again."},
+        {id:"rv_04",user:"Deepak V.",avatar:"DV",rating:3,date:"2025-12-10",text:"Average experience. Work was done but communication could improve."},
+      ],
+    },
+    {
+      id:"svc_002",name:"QuickFix Repair",category:"cat_repair",
+      tagline:"Home appliance repairs",
+      description:"QuickFix Repair is your one-stop shop for all home appliance issues. We repair washing machines, refrigerators, ACs, microwaves, geysers, and more. With 10+ years in the business and 500+ satisfied customers, we offer a 30-day service warranty on every job.",
+      rating:3.0,reviewCount:64,distance:2.0,verified:false,
+      phone:"+91 76543 21098",whatsapp:"+91 76543 21098",
+      address:"45 Gandhi Maidan, Patna, Bihar 800001",
+      openNow:true,hours:"Mon–Sun 9 AM – 7 PM",
+      priceRange:"₹300 – ₹3,000",icon:"🔧",iconBg:"#fff3e0",iconColor:"#e67700",
+      photos:[
+        "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=80",
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+      ],
+      services:[
+        {name:"Washing Machine Repair",price:"₹500 onwards"},
+        {name:"Refrigerator Repair",price:"₹400 onwards"},
+        {name:"AC Service",price:"₹700"},
+        {name:"Microwave Repair",price:"₹350"},
+        {name:"Geyser Repair",price:"₹300"},
+      ],
+      reviews:[
+        {id:"rv_05",user:"Rohit S.",avatar:"RS",rating:3,date:"2026-03-05",text:"Got the job done but took longer than quoted."},
+        {id:"rv_06",user:"Kavita P.",avatar:"KP",rating:3,date:"2026-01-18",text:"Average service. Parts were expensive."},
+        {id:"rv_07",user:"Mohan L.",avatar:"ML",rating:4,date:"2025-11-22",text:"Fixed my AC perfectly. Happy with the result."},
+      ],
+    },
+    {
+      id:"svc_003",name:"Sharma Plumbing",category:"cat_repair",
+      tagline:"Pipes, leaks & drainage",
+      description:"Sharma Plumbing offers fast and reliable plumbing services across Patna. Whether it's a leaky tap, blocked drain, bathroom fitting, or full pipeline installation — we handle it all. Available 24/7 for emergency calls.",
+      rating:5.0,reviewCount:212,distance:0.8,verified:true,
+      phone:"+91 65432 10987",whatsapp:"+91 65432 10987",
+      address:"Near Patna Junction, Patna, Bihar 800001",
+      openNow:true,hours:"24 × 7",
+      priceRange:"₹150 – ₹8,000",icon:"🪠",iconBg:"#e6fcf5",iconColor:"#0ca678",
+      photos:[
+        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80",
+        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80",
+        "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=80",
+      ],
+      services:[
+        {name:"Leak Repair",price:"₹150 onwards"},
+        {name:"Drain Unblocking",price:"₹300"},
+        {name:"Tap / Faucet Fitting",price:"₹250"},
+        {name:"Pipeline Installation",price:"₹1,500 onwards"},
+        {name:"Bathroom Fitting",price:"₹2,000 onwards"},
+        {name:"Water Tank Cleaning",price:"₹800"},
+      ],
+      reviews:[
+        {id:"rv_08",user:"Anjali T.",avatar:"AT",rating:5,date:"2026-04-01",text:"Absolutely fantastic! Came at midnight for an emergency — highly recommend."},
+        {id:"rv_09",user:"Raju D.",avatar:"RD",rating:5,date:"2026-03-15",text:"Best plumber in Patna. Very honest pricing and great work."},
+        {id:"rv_10",user:"Neha G.",avatar:"NG",rating:5,date:"2026-02-28",text:"Fixed a major pipeline leak quickly. No mess left behind."},
+        {id:"rv_11",user:"Sanjay B.",avatar:"SB",rating:5,date:"2026-01-10",text:"Exceptional service. Will always call Sharma Plumbing first."},
+      ],
+    },
+    {
+      id:"svc_004",name:"FreshBite Tiffin",category:"cat_food",
+      tagline:"Home-cooked meals delivered",
+      description:"FreshBite delivers fresh, home-style tiffin daily across Patna. Monthly, weekly, and daily subscription plans. Vegetarian and non-vegetarian options. Made fresh every day with zero preservatives.",
+      rating:4.5,reviewCount:95,distance:1.5,verified:true,
+      phone:"+91 99887 76655",whatsapp:"+91 99887 76655",
+      address:"12 Rajendra Nagar, Patna, Bihar 800016",
+      openNow:true,hours:"Delivery: 12 PM–2 PM & 7 PM–9 PM",
+      priceRange:"₹80 – ₹150 per meal",icon:"🍱",iconBg:"#fff0f6",iconColor:"#e64980",
+      photos:[
+        "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80",
+        "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&q=80",
+      ],
+      services:[
+        {name:"Daily Tiffin (Veg)",price:"₹80/meal"},
+        {name:"Daily Tiffin (Non-Veg)",price:"₹120/meal"},
+        {name:"Monthly Subscription",price:"₹1,800/month"},
+        {name:"Special Thali",price:"₹150/meal"},
+      ],
+      reviews:[
+        {id:"rv_12",user:"Meera P.",avatar:"MP",rating:5,date:"2026-03-28",text:"Tastes just like home. On time every day!"},
+        {id:"rv_13",user:"Gaurav S.",avatar:"GS",rating:4,date:"2026-02-20",text:"Good food and reasonable price. Recommended."},
+      ],
+    },
+  ],
+  bookings:[
+    {id:"bkg_001",serviceId:"svc_001",status:"completed",scheduledAt:"2026-03-25",issue:"Fan not working in bedroom",amount:450,rating:4},
+    {id:"bkg_002",serviceId:"svc_003",status:"upcoming",scheduledAt:"2026-04-12",issue:"Kitchen tap leaking",amount:250,rating:null},
+  ],
+};
+ 
+// ════════════════════════════════════════════════
+//  API LAYER
+// ════════════════════════════════════════════════
+const API = {
+  getProfile: () => ({...DB.user}),
+  getMenuItems: () => [...DB.menuItems],
+  getCategories: () => [...DB.categories],
+  getAllServices: (cat="cat_all", q="") => {
+    let list = DB.services;
+    if(cat && cat!=="cat_all") list=list.filter(s=>s.category===cat);
+    if(q) list=list.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.tagline.toLowerCase().includes(q.toLowerCase()));
+    return list;
+  },
+  getServiceById: id => DB.services.find(s=>s.id===id)||null,
+  getBookings: () => DB.bookings.map(b=>({...b,service:API.getServiceById(b.serviceId)})),
+  getSaved: () => DB.user.savedServices.map(id=>API.getServiceById(id)).filter(Boolean),
+  toggleSaved: id => {
+    const idx=DB.user.savedServices.indexOf(id);
+    if(idx===-1) DB.user.savedServices.push(id);
+    else DB.user.savedServices.splice(idx,1);
+    return DB.user.savedServices.includes(id);
+  },
+  addReview: (svcId,{rating,text}) => {
+    const svc=DB.services.find(s=>s.id===svcId); if(!svc) return null;
+    const rv={id:`rv_${Date.now()}`,user:DB.user.name,avatar:DB.user.name.split(" ").map(n=>n[0]).join(""),rating,date:new Date().toISOString().split("T")[0],text};
+    svc.reviews.unshift(rv);
+    const total=svc.reviews.reduce((s,r)=>s+r.rating,0);
+    svc.rating=Math.round(total/svc.reviews.length*10)/10;
+    svc.reviewCount=svc.reviews.length;
+    return rv;
+  },
+};
+ 
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let currentScreen="home";
+let history=[];
+let activeCat="cat_all";
+let currentSvc=null;
+let activeTab=0;
+let modalRating=0;
+ 
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+function showScreen(id,push=true){
+  const prev=document.querySelector(".screen.active");
+  if(prev) prev.classList.remove("active");
+  const next=document.getElementById("screen-"+id);
+  next.classList.add("active");
+  if(push && currentScreen!==id) history.push(currentScreen);
+  currentScreen=id;
+}
+function goBack(){
+  if(history.length){const prev=history.pop();showScreen(prev,false);}
+}
+function goHome(){showScreen("home",false);history=[];}
+function goProfile(){renderProfile();showScreen("profile");}
+function goBookings(){renderBookings();showScreen("bookings");}
+function goSaved(){renderSaved();showScreen("saved");}
+ 
+// ════════════════════════════════════════════════
+//  RENDER HOME
+// ════════════════════════════════════════════════
+function renderCategories(){
+  const el=document.getElementById("cat-list");
+  el.innerHTML=API.getCategories().map(c=>`
+    <button class="cat-chip${c.id===activeCat?' active':''}" onclick="selectCat('${c.id}')">
+      ${c.emoji} ${c.label}
+    </button>`).join("");
+}
+function selectCat(id){
+  activeCat=id;
+  renderCategories();
+  renderServices(API.getAllServices(id));
+}
+function filterServices(q){
+  renderServices(API.getAllServices(activeCat,q));
+}
+function renderServices(list){
+  const el=document.getElementById("svc-list");
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">No services found</div>`;return;}
+  el.innerHTML=list.map(s=>serviceCard(s)).join("");
+}
+function serviceCard(s){
+  const stars=starsHtml(s.rating);
+  const isSaved=DB.user.savedServices.includes(s.id);
+  const filled=s.rating>=4.5?"filled":"";
+  return `<div class="svc-card" onclick="openDetail('${s.id}')">
+    <div class="svc-icon" style="background:${s.iconBg}">${s.icon}</div>
+    <div class="svc-info">
+      <div class="svc-name-row">
+        <span class="svc-name">${s.name}</span>
+        ${s.verified?`<span class="badge-verified">✓ Verified</span>`:""}
       </div>
-      <p class="review-text">${text}</p>
-    `;
-
-    const list = document.getElementById('reviewsList');
-    list.insertBefore(card, list.firstChild);
-
-    reviewCount++;
-    document.getElementById('reviewsCount').textContent = reviewCount + ' reviews';
-
-    // Reset form
-    document.getElementById('reviewService').value = '';
-    document.getElementById('reviewText').value = '';
-    document.getElementById('charCount').textContent = '0';
-    selectedRating = 0;
-    document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
-    document.getElementById('ratingLabel').textContent = 'Tap to rate';
-    document.getElementById('submitBtn').disabled = true;
-
-    showToast('✅ Review submitted — thank you!');
-
-    // Scroll to new review
-    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
-  }
-
-  // Keep submit button in sync when service changes
-  document.getElementById('reviewService').addEventListener('change', checkSubmit);
-
-document.getElementById('reviewService').addEventListener('change', checkSubmit);
-
-/* ── Load reviews from backend ── */
-async function loadReviews() {
-  try {
-    const res = await fetch('http://localhost:5000/reviews');
-    const data = await res.json();
-
-    const list = document.getElementById('reviewsList');
-    list.innerHTML = '';
-
-    data.forEach(r => {
-      const card = document.createElement('div');
-      card.className = 'review-card';
-
-      const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-
-      card.innerHTML = `
-        <div class="review-card-header">
-          <div class="reviewer-avatar" style="background:#DBEAFE;color:#1A56DB">U</div>
-          <div class="reviewer-info">
-            <div class="reviewer-name">User</div>
-            <div class="reviewer-meta">${new Date(r.createdAt).toLocaleString()}</div>
+      <div class="stars">${stars} ${s.rating.toFixed(1)} · ${s.distance}km</div>
+      <div class="svc-tagline">${s.tagline}</div>
+    </div>
+    <button class="call-btn ${filled}" onclick="event.stopPropagation();callService('${s.phone}')">Call now</button>
+  </div>`;
+}
+function starsHtml(r){
+  return [1,2,3,4,5].map(i=>`<span class="s${i<=Math.round(r)?' on':''}">★</span>`).join("");
+}
+ 
+// ════════════════════════════════════════════════
+//  SERVICE DETAIL
+// ════════════════════════════════════════════════
+function openDetail(id){
+  currentSvc=API.getServiceById(id);
+  if(!currentSvc) return;
+  renderDetail(currentSvc);
+  switchTab(0);
+  showScreen("detail");
+}
+function renderDetail(s){
+  // header bg
+  const hdr=document.getElementById("detail-header");
+  hdr.style.background=`linear-gradient(135deg, ${s.iconBg}, ${s.iconColor}22)`;
+  hdr.innerHTML=`
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;opacity:.2">${s.icon}</div>
+    <button class="detail-back" onclick="goBack()">←</button>
+    <button class="detail-fav" id="fav-btn" onclick="toggleFav()">${DB.user.savedServices.includes(s.id)?'❤️':'🤍'}</button>`;
+ 
+  // card
+  const stars=starsHtml(s.rating);
+  document.getElementById("detail-card").innerHTML=`
+    <div class="detail-title-row">
+      <div class="detail-name">${s.icon} ${s.name}</div>
+      ${s.openNow?`<div class="detail-open">Open Now</div>`:`<div class="detail-open" style="background:#fee2e2;color:#e53e3e">Closed</div>`}
+    </div>
+    <div class="detail-meta">
+      <div class="detail-meta-item">${stars} <b>${s.rating}</b> (${s.reviewCount})</div>
+      <div class="detail-meta-item">📍 ${s.distance} km</div>
+      <div class="detail-meta-item">💰 ${s.priceRange}</div>
+    </div>`;
+ 
+  // tabs content
+  renderAboutTab(s);
+  renderServicesTab(s);
+  renderReviewsTab(s);
+  renderPhotosTab(s);
+ 
+  // call bar
+  document.getElementById("call-bar").innerHTML=`
+    <button class="call-bar-btn primary" onclick="callService('${s.phone}')">📞 Call Now</button>
+    <button class="call-bar-btn secondary" onclick="whatsapp('${s.whatsapp}')">💬 WhatsApp</button>`;
+}
+function renderAboutTab(s){
+  document.getElementById("tab-about").innerHTML=`
+    <p class="about-text">${s.description}</p>
+    <div class="info-list">
+      <div class="info-row"><span class="info-icon">📍</span><span class="info-val">${s.address}</span></div>
+      <div class="info-row"><span class="info-icon">📞</span><span class="info-val">${s.phone}</span></div>
+      <div class="info-row"><span class="info-icon">🕐</span><span class="info-val">${s.hours}</span></div>
+      <div class="info-row"><span class="info-icon">💰</span><span class="info-val">${s.priceRange}</span></div>
+      ${s.verified?`<div class="info-row"><span class="info-icon">✅</span><span class="info-val" style="color:#0ca678;font-weight:600">Verified Provider</span></div>`:""}
+    </div>`;
+}
+function renderServicesTab(s){
+  document.getElementById("tab-services").innerHTML=`
+    <div class="services-list">
+      ${s.services.map(sv=>`
+        <div class="svc-item">
+          <span class="svc-item-name">${sv.name}</span>
+          <span class="svc-item-price">${sv.price}</span>
+        </div>`).join("")}
+    </div>`;
+}
+function renderReviewsTab(s){
+  const counts=[0,0,0,0,0];
+  s.reviews.forEach(r=>counts[r.rating-1]++);
+  const bars=[5,4,3,2,1].map(star=>{
+    const pct=s.reviewCount?Math.round(counts[star-1]/s.reviewCount*100):0;
+    return `<div class="rbar-row">
+      <span class="rbar-label">${star}</span>
+      <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%"></div></div>
+      <span class="rbar-count">${counts[star-1]}</span>
+    </div>`;
+  }).join("");
+ 
+  document.getElementById("tab-reviews").innerHTML=`
+    <div class="review-summary">
+      <div>
+        <div class="review-score">${s.rating.toFixed(1)}</div>
+        <div style="display:flex;gap:2px;margin-top:4px">${starsHtml(s.rating)}</div>
+        <div style="font-size:11px;color:#475569;margin-top:2px">${s.reviewCount} reviews</div>
+      </div>
+      <div class="review-bars">${bars}</div>
+    </div>
+    ${s.reviews.map(rv=>`
+      <div class="review-card">
+        <div class="rv-header">
+          <div class="rv-avatar">${rv.avatar}</div>
+          <div>
+            <div class="rv-name">${rv.user}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="display:flex;gap:1px">${starsHtml(rv.rating)}</div>
+              <span class="rv-date">${rv.date}</span>
+            </div>
           </div>
-          <span class="review-stars">${stars}</span>
-          <span class="review-service-tag">${r.service}</span>
         </div>
-        <p class="review-text">${r.text}</p>
-      `;
-
-      list.appendChild(card);
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
+        <div class="rv-text">${rv.text}</div>
+      </div>`).join("")}
+    <button class="add-review-btn" onclick="openReviewModal()">+ Write a Review</button>`;
 }
-
-loadReviews();
-/* ── Menu toggle ── */
-function openMenu() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('overlay').classList.add('show');
+function renderPhotosTab(s){
+  document.getElementById("tab-photos").innerHTML=`
+    <div class="photos-grid">
+      ${s.photos.map(p=>`<img class="photo-img" src="${p}" alt="photo" loading="lazy"/>`).join("")}
+    </div>`;
 }
-
-function closeMenu() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
+function switchTab(idx){
+  activeTab=idx;
+  const tabs=document.querySelectorAll(".tab");
+  const panels=document.querySelectorAll(".tab-panel");
+  tabs.forEach((t,i)=>{t.classList.toggle("active",i===idx)});
+  panels.forEach((p,i)=>{p.classList.toggle("active",i===idx)});
 }
+function toggleFav(){
+  if(!currentSvc) return;
+  const saved=API.toggleSaved(currentSvc.id);
+  document.getElementById("fav-btn").textContent=saved?"❤️":"🤍";
+}
+ 
+// ════════════════════════════════════════════════
+//  PROFILE
+// ════════════════════════════════════════════════
+function renderProfile(){
+  const u=API.getProfile();
+  document.getElementById("p-avatar").src=u.avatar;
+  document.getElementById("p-name").textContent=u.name;
+  document.getElementById("p-email").textContent=u.email;
+  document.getElementById("p-loc").textContent=`📍 ${u.location.city}, ${u.location.state}`;
+  document.getElementById("p-phone").textContent=u.phone;
+  document.getElementById("p-email2").textContent=u.email;
+  document.getElementById("p-loc2").textContent=`${u.location.city}, ${u.location.state}`;
+  document.getElementById("st-bookings").textContent=DB.bookings.length;
+  document.getElementById("st-saved").textContent=DB.user.savedServices.length;
+  document.getElementById("st-reviews").textContent=3;
+  document.getElementById("booking-badge").textContent=DB.bookings.filter(b=>b.status==="upcoming").length;
+}
+ 
+// ════════════════════════════════════════════════
+//  DRAWER / MENU
+// ════════════════════════════════════════════════
+function openDrawer(){
+  const u=API.getProfile();
+  document.getElementById("d-avatar").src=u.avatar;
+  document.getElementById("d-name").textContent=u.name;
+  document.getElementById("d-email").textContent=u.email;
+  const items=document.getElementById("drawer-items");
+  items.innerHTML=API.getMenuItems().map((m,i)=>{
+    const div=i===3?'<div class="drawer-divider"></div>':""
+    return `${div}<button class="drawer-item" onclick="drawerAction('${m.action}')">
+      <span class="di-icon">${m.icon}</span>
+      <span class="di-label">${m.label}</span>
+    </button>`;
+  }).join("");
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("drawer-overlay").classList.add("open");
+}
+function closeDrawer(){
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("drawer-overlay").classList.remove("open");
+}
+function drawerAction(fn){
+  closeDrawer();
+  if(fn && window[fn]) setTimeout(window[fn],200);
+}
+ 
+// ════════════════════════════════════════════════
+//  BOOKINGS
+// ════════════════════════════════════════════════
+function renderBookings(){
+  const list=API.getBookings();
+  const el=document.getElementById("bookings-body");
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#94a3b8">No bookings yet</div>`;return;}
+  el.innerHTML=list.map(b=>{
+    const s=b.service;
+    const statusColor=b.status==="completed"?"#0ca678":"#3b5bdb";
+    const statusBg=b.status==="completed"?"#e6fcf5":"#e8f0fe";
+    return `<div class="svc-card" style="margin:12px 20px 0" onclick="${b.service?`openDetail('${b.serviceId}')`:''}">
+      <div class="svc-icon" style="background:${s?.iconBg||'#f1f5f9'}">${s?.icon||'📦'}</div>
+      <div class="svc-info">
+        <div class="svc-name">${s?.name||'Unknown Service'}</div>
+        <div style="font-size:12px;color:#64748b;margin:2px 0">${b.issue}</div>
+        <div style="font-size:12px;color:#94a3b8">📅 ${b.scheduledAt} · ₹${b.amount}</div>
+      </div>
+      <span style="background:${statusBg};color:${statusColor};font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap">${b.status==="completed"?"✓ Done":"Upcoming"}</span>
+    </div>`;
+  }).join("")+'<div style="height:24px"></div>';
+}
+ 
+// ════════════════════════════════════════════════
+//  SAVED
+// ════════════════════════════════════════════════
+function renderSaved(){
+  const list=API.getSaved();
+  const el=document.getElementById("saved-body");
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#94a3b8">No saved services yet.<br>Tap ❤️ on any service to save it.</div>`;return;}
+  el.innerHTML=list.map(s=>serviceCard(s)).join("");
+}
+ 
+// ════════════════════════════════════════════════
+//  REVIEW MODAL
+// ════════════════════════════════════════════════
+function openReviewModal(){
+  modalRating=0;
+  document.getElementById("review-text").value="";
+  renderModalStars();
+  document.getElementById("review-modal").classList.add("open");
+}
+function closeReviewModal(){
+  document.getElementById("review-modal").classList.remove("open");
+}
+function renderModalStars(){
+  document.getElementById("modal-stars").innerHTML=[1,2,3,4,5].map(i=>
+    `<span class="modal-star${i<=modalRating?' active':''}" onclick="setModalRating(${i})">★</span>`
+  ).join("");
+}
+function setModalRating(r){
+  modalRating=r;
+  renderModalStars();
+}
+function submitReview(){
+  if(!currentSvc||!modalRating) return;
+  const text=document.getElementById("review-text").value.trim();
+  if(!text) return;
+  API.addReview(currentSvc.id,{rating:modalRating,text});
+  closeReviewModal();
+  renderReviewsTab(currentSvc);
+  renderDetail(currentSvc);
+  switchTab(2);
+}
+ 
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+function callService(phone){
+  alert(`📞 Calling ${phone}...\n(In production this triggers tel: link)`);
+}
+function whatsapp(phone){
+  alert(`💬 Opening WhatsApp for ${phone}...`);
+}
+ 
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+renderCategories();
+renderServices(API.getAllServices());
 </script>
-
 </body>
 </html>
