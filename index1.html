@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityServe – City Services App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #1A56DB;
+      --blue-light:  #DBEAFE;
+      --blue-dark:   #1340A8;
+      --amber:       #D97706;
+      --amber-light: #FEF3C7;
+      --green:       #16A34A;
+      --green-light: #F0FDF4;
+      --red:         #EF4444;
+      --gray-50:     #F9FAFB;
+      --gray-100:    #F3F4F6;
+      --gray-200:    #E5E7EB;
+      --gray-400:    #9CA3AF;
+      --gray-500:    #6B7280;
+      --gray-700:    #374151;
+      --gray-900:    #111827;
+      --shadow-md:   0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #EFF6FF;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Phone shell ── */
+    .phone {
+      width: 375px;
+      height: 780px;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(26,86,219,0.18), 0 4px 16px rgba(0,0,0,0.1);
+      border: 6px solid #fff;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: absolute;
+      top: 16px; left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--gray-900);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Header ── */
+    .header { background: var(--blue); padding: 16px 18px 0; flex-shrink: 0; }
+    .header-top {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 14px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-icons { display: flex; align-items: center; gap: 16px; }
+    .header-icons svg { cursor: pointer; opacity: 0.9; }
+    .header-icons svg:hover { opacity: 1; }
+
+    /* ── Search ── */
+    .search-wrap { background: var(--blue); padding: 0 16px 16px; flex-shrink: 0; }
+    .search-bar {
+      background: #fff; border-radius: 14px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .search-bar input {
+      border: none; outline: none; font-family: inherit;
+      font-size: 14px; color: var(--gray-700); flex: 1; background: transparent;
+    }
+    .search-bar input::placeholder { color: var(--gray-400); }
+
+    /* ── Location ── */
+    .location-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 18px 10px;
+      border-bottom: 1px solid var(--gray-100); flex-shrink: 0;
+    }
+    .location-bar span { font-size: 13px; color: var(--gray-500); }
+    .location-bar strong { font-size: 13px; color: var(--blue); font-weight: 600; }
+
+    /* ── Screens ── */
+    .screen { display: none; flex-direction: column; overflow-y: auto; flex: 1; }
+    .screen.active { display: flex; }
+
+    /* ── Custom scrollbar (screen) ── */
+    .screen::-webkit-scrollbar { width: 4px; }
+    .screen::-webkit-scrollbar-track { background: transparent; }
+    .screen::-webkit-scrollbar-thumb {
+      background: #BFDBFE;
+      border-radius: 99px;
+    }
+    .screen::-webkit-scrollbar-thumb:hover { background: #93C5FD; }
+    .screen { scrollbar-width: thin; scrollbar-color: #BFDBFE transparent; }
+
+    /* ── Categories ── */
+    .section { padding: 14px 16px 10px; }
+    .section-label {
+      font-size: 11px; font-weight: 600; color: var(--gray-400);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+    }
+    .cats {
+      display: flex; gap: 8px;
+      overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;
+    }
+    .cats::-webkit-scrollbar { display: none; }
+    .cat-pill {
+      flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1.5px solid transparent;
+      transition: all 0.18s ease; user-select: none;
+    }
+    .cat-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .cat-pill:not(.active) { background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200); }
+    .cat-pill:not(.active):hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue-light); }
+    .cat-emoji { font-size: 15px; line-height: 1; }
+
+    /* ── Map strip ── */
+    .map-strip {
+      margin: 0 16px 4px; border-radius: 16px; overflow: hidden;
+      position: relative; height: 96px;
+      background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 60%,#93c5fd 100%);
+      cursor: pointer; flex-shrink: 0;
+    }
+    .map-strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .map-btn {
+      position: absolute; bottom: 8px; left: 8px;
+      background: var(--blue); color: #fff;
+      font-size: 11px; font-weight: 600; padding: 5px 12px;
+      border-radius: 8px; border: none; cursor: pointer;
+      font-family: inherit; transition: background 0.15s;
+    }
+    .map-btn:hover { background: var(--blue-dark); }
+
+    /* ── Nearby header ── */
+    .nearby-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 10px;
+    }
+    .nearby-header h2 { font-size: 15px; font-weight: 600; color: var(--gray-900); }
+    .see-all { font-size: 12px; color: var(--blue); font-weight: 500; cursor: pointer; text-decoration: none; }
+
+    /* ── Cards ── */
+    .cards { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 16px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      transition: box-shadow 0.18s, transform 0.18s; cursor: pointer;
+    }
+    .card.hidden { display: none; }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .card-info { flex: 1; min-width: 0; }
+    .card-name { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
+    .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .stars { display: flex; gap: 1px; font-size: 12px; }
+    .star-fill { color: #FBBF24; }
+    .star-empty { color: #D1D5DB; }
+    .card-dist { font-size: 11px; color: var(--gray-500); font-weight: 500; }
+    .card-sub { font-size: 11px; color: var(--gray-400); }
+    .no-results {
+      text-align: center; padding: 28px 16px;
+      color: var(--gray-400); font-size: 14px; display: none;
+    }
+    .no-results.show { display: block; }
+
+    /* ── Call button ── */
+    .btn-call {
+      border: none; border-radius: 10px; padding: 9px 13px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s;
+      text-decoration: none; display: inline-block; text-align: center;
+    }
+    .btn-call:hover { opacity: 0.88; }
+    .btn-call:active { transform: scale(0.96); }
+    .btn-call.primary { background: var(--blue); color: #fff; }
+    .btn-call.secondary { background: #fff; color: var(--blue); border: 1.5px solid var(--blue); }
+    .btn-call.green { background: var(--green); color: #fff; }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600;
+    }
+    .badge.verified { background: #D1FAE5; color: #065F46; }
+
+    /* ── Bookings screen ── */
+    .bookings-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 24px; gap: 12px; text-align: center;
+    }
+    .bookings-empty .icon-wrap {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: var(--blue-light);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+    }
+    .bookings-empty h3 { font-size: 16px; font-weight: 600; color: var(--gray-900); }
+    .bookings-empty p { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
+    .btn-explore {
+      margin-top: 8px; background: var(--blue); color: #fff;
+      border: none; border-radius: 12px; padding: 10px 24px;
+      font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-explore:hover { background: var(--blue-dark); }
+
+    /* ── Bottom nav ── */
+    .bottom-nav { border-top: 1px solid var(--gray-200); display: flex; flex-shrink: 0; }
+    .nav-tab {
+      flex: 1; padding: 12px 0;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .nav-tab.active { background: #EFF6FF; }
+    .nav-tab:not(.active):hover { background: var(--gray-50); }
+    .nav-label { font-size: 11px; font-weight: 500; }
+    .nav-tab.active .nav-label { color: var(--blue); }
+    .nav-tab:not(.active) .nav-label { color: var(--gray-400); }
+
+    /* ── Reviews screen ── */
+    .reviews-screen { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Service selector */
+    .service-select-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .service-select-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
+    .service-select {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--gray-200); border-radius: 12px;
+      font-family: inherit; font-size: 13px; color: var(--gray-700);
+      background: var(--gray-50); outline: none; cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .service-select:focus { border-color: var(--blue); background-color: #fff; }
+
+    /* Star rating input */
+    .star-input-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .star-input-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
+    .star-row { display: flex; gap: 6px; align-items: center; }
+    .star-btn {
+      font-size: 28px; cursor: pointer; color: #D1D5DB;
+      transition: color 0.15s, transform 0.1s; background: none; border: none; padding: 0; line-height: 1;
+    }
+    .star-btn.lit { color: #FBBF24; }
+    .star-btn:hover { transform: scale(1.15); }
+    .rating-label { font-size: 12px; color: var(--gray-500); margin-left: 6px; font-weight: 500; }
+
+    /* Text area */
+    .review-textarea-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .review-textarea-wrap label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.07em; }
+    .review-textarea {
+      width: 100%; border: 1px solid var(--gray-200); border-radius: 12px;
+      padding: 10px 12px; font-family: inherit; font-size: 13px;
+      color: var(--gray-700); resize: none; outline: none;
+      background: var(--gray-50); line-height: 1.6;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .review-textarea:focus { border-color: var(--blue); background: #fff; }
+    .review-textarea::placeholder { color: var(--gray-400); }
+    .char-count { font-size: 11px; color: var(--gray-400); text-align: right; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 12px; border: none; border-radius: 14px;
+      background: var(--blue); color: #fff;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover { background: var(--blue-dark); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; transform: none; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+    .divider span { font-size: 11px; color: var(--gray-400); font-weight: 500; white-space: nowrap; }
+
+    /* Existing review cards */
+    .review-card {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: 14px; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .review-card-header { display: flex; align-items: center; gap: 10px; }
+    .reviewer-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .reviewer-info { flex: 1; min-width: 0; }
+    .reviewer-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .reviewer-meta { font-size: 11px; color: var(--gray-400); }
+    .review-stars { font-size: 12px; color: #FBBF24; letter-spacing: 1px; }
+    .review-service-tag {
+      font-size: 10px; font-weight: 600; background: var(--blue-light);
+      color: var(--blue); padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+    }
+    .review-text { font-size: 13px; color: var(--gray-700); line-height: 1.6; }
+
+    /* New review highlight */
+    .review-card.new-review {
+      border-color: #86EFAC; background: #F0FDF4;
+      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Section heading */
+    .reviews-section-title {
+      font-size: 13px; font-weight: 600; color: var(--gray-700);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .reviews-count { font-size: 11px; color: var(--gray-400); font-weight: 500; }
+  /* ── Sidebar menu ── */
+.sidebar {
+  position: absolute;
+  top: 0;
+  right: -260px;
+  width: 260px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  transition: right 0.3s ease;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar-content {
+  padding: 20px;
+}
+
+.sidebar-content h3 {
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+.menu-item {
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.menu-item:hover {
+  background: #F3F4F6;
+}
+
+/* Overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 999;
+}
+
+.overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+  </style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <div id="sidebar" class="sidebar">
+  <div class="sidebar-content">
+    <h3>Menu</h3>
+
+    <div class="menu-item" onclick="switchTab('home'); closeMenu()">🏠 Home</div>
+    <div class="menu-item" onclick="switchTab('reviews'); closeMenu()">⭐ Reviews</div>
+    <div class="menu-item" onclick="switchTab('bookings'); closeMenu()">📅 Bookings</div>
+
+    <div class="menu-item" onclick="showToast('Profile coming soon!')">👤 Profile</div>
+    <div class="menu-item" onclick="showToast('Settings coming soon!')">⚙ Settings</div>
+  </div>
+</div>
+<!-- Overlay -->
+<div id="overlay" class="overlay" onclick="closeMenu()"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/>
+            <path d="M5 8.5L7 10.5L11 6.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="logo-text">CityServe</span>
+      </div>
+      <div class="header-icons">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" onclick="showToast('Profile coming soon!')">
+          <circle cx="11" cy="8" r="3.5" stroke="white" stroke-width="1.5"/>
+          <path d="M3.5 19c0-4.142 3.358-7.5 7.5-7.5s7.5 3.358 7.5 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" onclick="showToast('Menu opening...')">
+          <rect x="3" y="6" width="16" height="1.6" rx="0.8" fill="white"/>
+          <rect x="3" y="10.2" width="16" height="1.6" rx="0.8" fill="white"/>
+          <rect x="3" y="14.4" width="11" height="1.6" rx="0.8" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-wrap">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="5" stroke="#9CA3AF" stroke-width="1.5"/>
+        <path d="M11 11L14.5 14.5" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder='Search for "Electrician..."' oninput="filterCards()" />
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="cursor:pointer" onclick="showToast('Voice search activated 🎤')">
+        <path d="M8.5 1.5v10M6 4C6 3.172 7.12 2.5 8.5 2.5S11 3.172 11 4v4C11 8.828 9.88 9.5 8.5 9.5S6 8.828 6 8V4z" stroke="#1A56DB" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M4 9.5a4.5 4.5 0 0 0 9 0" stroke="#1A56DB" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- LOCATION BAR -->
+  <div class="location-bar">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M7 1C5.07 1 3.5 2.57 3.5 4.5C3.5 7.125 7 13 7 13C7 13 10.5 7.125 10.5 4.5C10.5 2.57 8.93 1 7 1Z" fill="#EF4444"/>
+      <circle cx="7" cy="4.5" r="1.5" fill="white"/>
+    </svg>
+    <span>Current location:</span>
+    <strong>Patna, Bihar</strong>
+  </div>
+
+  <!-- ════════════════════════ -->
+  <!-- HOME SCREEN             -->
+  <!-- ════════════════════════ -->
+  <div class="screen active" id="screen-home">
+
+    <div class="section">
+      <p class="section-label">Categories</p>
+      <div class="cats">
+        <div class="cat-pill active" onclick="setCategory(this,'all')"><span class="cat-emoji">✨</span> All</div>
+        <div class="cat-pill" onclick="setCategory(this,'repair')"><span class="cat-emoji">🔧</span> Repair</div>
+        <div class="cat-pill" onclick="setCategory(this,'food')"><span class="cat-emoji">🍱</span> Food</div>
+        <div class="cat-pill" onclick="setCategory(this,'tutors')"><span class="cat-emoji">📚</span> Tutors</div>
+        <div class="cat-pill" onclick="setCategory(this,'cafes')"><span class="cat-emoji">☕</span> Cafes</div>
+        <div class="cat-pill" onclick="setCategory(this,'cleaning')"><span class="cat-emoji">🧹</span> Cleaning</div>
+        <div class="cat-pill" onclick="setCategory(this,'medical')"><span class="cat-emoji">🏥</span> Medical</div>
+      </div>
+    </div>
+
+    <div class="map-strip" onclick="showToast('Opening full map view...')">
+      <svg viewBox="0 0 343 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="34" x2="343" y2="34" stroke="#93c5fd" stroke-width="9"/>
+        <line x1="86" y1="0" x2="86" y2="96" stroke="#93c5fd" stroke-width="6"/>
+        <line x1="210" y1="0" x2="210" y2="96" stroke="#bfdbfe" stroke-width="5"/>
+        <rect x="20" y="42" width="54" height="36" rx="5" fill="#bfdbfe" opacity="0.8"/>
+        <rect x="96" y="42" width="98" height="26" rx="5" fill="#bfdbfe" opacity="0.8"/>
+        <rect x="218" y="42" width="66" height="42" rx="5" fill="#bfdbfe" opacity="0.7"/>
+        <circle cx="160" cy="20" r="12" fill="#1A56DB"/>
+        <circle cx="160" cy="20" r="5" fill="white"/>
+        <circle cx="240" cy="52" r="8" fill="#60A5FA"/>
+        <circle cx="240" cy="52" r="3.5" fill="white"/>
+      </svg>
+      <button class="map-btn">&#9650; Map view</button>
+    </div>
+
+    <div class="nearby-header">
+      <h2>Nearby services</h2>
+      <a class="see-all" href="#" onclick="showToast('Loading all services...');return false;">See all →</a>
+    </div>
+
+    <div class="cards" id="cardList">
+
+      <!-- ABC Electrician -->
+      <div class="card" data-name="abc electrician electrical wiring" data-category="repair">
+        <div class="card-icon" style="background:var(--blue-light)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#1A56DB"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <p class="card-name" style="margin:0">ABC Electrician</p>
+            <span class="badge verified">✓ Verified</span>
+          </div>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
+            <span class="card-dist">4.0 · 1.2 km</span>
+          </div>
+          <p class="card-sub">Electrical repairs &amp; wiring</p>
+        </div>
+        <!-- Replace +919876543210 with the real phone number -->
+        <a class="btn-call primary" href="tel:+919876543210">Call now</a>
+      </div>
+
+      <!-- QuickFix Repair -->
+      <div class="card" data-name="quickfix repair appliance home" data-category="repair">
+        <div class="card-icon" style="background:var(--amber-light)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z" stroke="#D97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <p class="card-name">QuickFix Repair</p>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★</span><span class="star-empty">★★</span></div>
+            <span class="card-dist">3.0 · 2.0 km</span>
+          </div>
+          <p class="card-sub">Home appliance repairs</p>
+        </div>
+        <a class="btn-call secondary" href="tel:+919876543211">Call now</a>
+      </div>
+
+      <!-- Sharma Plumbing -->
+      <div class="card" data-name="sharma plumbing pipes leaks drainage" data-category="repair">
+        <div class="card-icon" style="background:var(--green-light)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <p class="card-name">Sharma Plumbing</p>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★★</span></div>
+            <span class="card-dist">5.0 · 0.8 km</span>
+          </div>
+          <p class="card-sub">Pipes, leaks &amp; drainage</p>
+        </div>
+        <a class="btn-call green" href="tel:+919876543212">Call now</a>
+      </div>
+
+      <!-- Biryani House -->
+      <div class="card" data-name="biryani house food delivery north indian" data-category="food">
+        <div class="card-icon" style="background:#FFF7ED">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <ellipse cx="12" cy="15" rx="9" ry="3" stroke="#EA580C" stroke-width="1.5"/>
+            <path d="M3 15c0-4 3-8 9-9s9 5 9 9" stroke="#EA580C" stroke-width="1.5"/>
+            <path d="M8 10s1-2 4-2 4 2 4 2" stroke="#EA580C" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <p class="card-name">Biryani House</p>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
+            <span class="card-dist">4.2 · 1.5 km</span>
+          </div>
+          <p class="card-sub">North Indian, Biryani, Kebabs</p>
+        </div>
+        <a class="btn-call primary" style="background:#EA580C" href="tel:+919876543213">Call now</a>
+      </div>
+
+      <!-- Cafe Aroha -->
+      <div class="card" data-name="cafe aroha coffee cafes snacks" data-category="cafes">
+        <div class="card-icon" style="background:#FEF9C3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M17 8h1a4 4 0 0 1 0 8h-1" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" stroke="#CA8A04" stroke-width="1.5"/>
+            <path d="M6 2v3M10 2v3M14 2v3" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <p class="card-name">Cafe Aroha</p>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
+            <span class="card-dist">4.3 · 0.6 km</span>
+          </div>
+          <p class="card-sub">Specialty coffee &amp; snacks</p>
+        </div>
+        <a class="btn-call primary" style="background:#CA8A04" href="tel:+919876543214">Call now</a>
+      </div>
+
+      <!-- CleanPro -->
+      <div class="card" data-name="cleanpro cleaning home deep sanitisation" data-category="cleaning">
+        <div class="card-icon" style="background:#EDE9FE">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M3 21l5-5M9 15l1-8 5-4 2 2-4 5-1 8" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <p class="card-name">CleanPro Services</p>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★</span><span class="star-empty">★</span></div>
+            <span class="card-dist">4.1 · 1.8 km</span>
+          </div>
+          <p class="card-sub">Deep cleaning &amp; sanitisation</p>
+        </div>
+        <a class="btn-call primary" style="background:#7C3AED" href="tel:+919876543215">Call now</a>
+      </div>
+
+      <!-- MedPoint Clinic -->
+      <div class="card" data-name="medpoint clinic medical doctor health" data-category="medical">
+        <div class="card-icon" style="background:#FEE2E2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" stroke="#DC2626" stroke-width="1.5"/>
+            <path d="M12 8v8M8 12h8" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-info">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <p class="card-name" style="margin:0">MedPoint Clinic</p>
+            <span class="badge verified">✓ Verified</span>
+          </div>
+          <div class="card-meta">
+            <div class="stars"><span class="star-fill">★★★★★</span></div>
+            <span class="card-dist">5.0 · 0.5 km</span>
+          </div>
+          <p class="card-sub">General physician &amp; diagnostics</p>
+        </div>
+        <a class="btn-call primary" style="background:#DC2626" href="tel:+919876543216">Call now</a>
+      </div>
+
+    </div>
+
+    <div class="no-results" id="noResults">😕 No services found. Try a different search.</div>
+
+  </div><!-- /screen-home -->
+
+  <!-- ════════════════════════ -->
+  <!-- BOOKINGS SCREEN         -->
+  <!-- ════════════════════════ -->
+  <div class="screen" id="screen-bookings">
+    <div class="bookings-empty">
+      <div class="icon-wrap">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <rect x="5" y="7" width="26" height="26" rx="4" stroke="#1A56DB" stroke-width="2"/>
+          <path d="M12 7V4M24 7V4" stroke="#1A56DB" stroke-width="2" stroke-linecap="round"/>
+          <path d="M5 15H31" stroke="#1A56DB" stroke-width="2"/>
+          <path d="M12 22h5M12 27h9" stroke="#1A56DB" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>No bookings yet</h3>
+      <p>You haven't made any bookings.<br/>Explore services and call to book one.</p>
+      <button class="btn-explore" onclick="switchTab('home')">Explore services</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ -->
+  <!-- REVIEWS SCREEN          -->
+  <!-- ════════════════════════ -->
+  <div class="screen" id="screen-reviews">
+    <div class="reviews-screen">
+
+      <!-- Write a Review form -->
+      <div style="font-size:15px;font-weight:700;color:var(--gray-900);">Rate &amp; Review</div>
+
+      <!-- Service selector -->
+      <div class="service-select-wrap">
+        <label>Select service</label>
+        <select class="service-select" id="reviewService">
+          <option value="">— Choose a service —</option>
+          <option value="ABC Electrician">ABC Electrician</option>
+          <option value="QuickFix Repair">QuickFix Repair</option>
+          <option value="Sharma Plumbing">Sharma Plumbing</option>
+          <option value="Biryani House">Biryani House</option>
+          <option value="Cafe Aroha">Cafe Aroha</option>
+          <option value="CleanPro Services">CleanPro Services</option>
+          <option value="MedPoint Clinic">MedPoint Clinic</option>
+        </select>
+      </div>
+
+      <!-- Star rating -->
+      <div class="star-input-wrap">
+        <label>Your rating</label>
+        <div class="star-row" id="starRow">
+          <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+          <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+          <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+          <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+          <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+          <span class="rating-label" id="ratingLabel">Tap to rate</span>
+        </div>
+      </div>
+
+      <!-- Review text -->
+      <div class="review-textarea-wrap">
+        <label>Your review</label>
+        <textarea class="review-textarea" id="reviewText" rows="4"
+          placeholder="Share your experience — what did you like or dislike?"
+          oninput="onTextInput()"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 300</div>
+      </div>
+
+      <!-- Submit -->
+      <button class="btn-submit" id="submitBtn" onclick="submitReview()" disabled>Submit review</button>
+
+      <!-- Divider -->
+      <div class="divider"><span>Recent reviews</span></div>
+
+      <!-- Review count line -->
+      <div class="reviews-section-title">
+        Community feedback
+        <span class="reviews-count" id="reviewsCount">4 reviews</span>
+      </div>
+
+      <!-- Existing reviews list -->
+      <div id="reviewsList" style="display:flex;flex-direction:column;gap:10px;">
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="reviewer-avatar" style="background:#DBEAFE;color:#1A56DB">RK</div>
+            <div class="reviewer-info">
+              <div class="reviewer-name">Rahul K.</div>
+              <div class="reviewer-meta">2 days ago</div>
+            </div>
+            <span class="review-stars">★★★★★</span>
+            <span class="review-service-tag">ABC Electrician</span>
+          </div>
+          <p class="review-text">Very professional service. Fixed our wiring issue within an hour. Highly recommend!</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="reviewer-avatar" style="background:#FEF3C7;color:#D97706">PM</div>
+            <div class="reviewer-info">
+              <div class="reviewer-name">Priya M.</div>
+              <div class="reviewer-meta">5 days ago</div>
+            </div>
+            <span class="review-stars">★★★★</span>
+            <span class="review-service-tag">Sharma Plumbing</span>
+          </div>
+          <p class="review-text">Came on time and fixed the leak quickly. Reasonable pricing too.</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="reviewer-avatar" style="background:#F0FDF4;color:#16A34A">AS</div>
+            <div class="reviewer-info">
+              <div class="reviewer-name">Arjun S.</div>
+              <div class="reviewer-meta">1 week ago</div>
+            </div>
+            <span class="review-stars">★★★</span>
+            <span class="review-service-tag">QuickFix Repair</span>
+          </div>
+          <p class="review-text">Decent service but took longer than expected. Work quality was fine.</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="reviewer-avatar" style="background:#EDE9FE;color:#7C3AED">NJ</div>
+            <div class="reviewer-info">
+              <div class="reviewer-name">Neha J.</div>
+              <div class="reviewer-meta">2 weeks ago</div>
+            </div>
+            <span class="review-stars">★★★★★</span>
+            <span class="review-service-tag">CleanPro Services</span>
+          </div>
+          <p class="review-text">Absolutely spotless! The team was thorough and polite. Will definitely book again.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-tab active" id="tab-home" onclick="switchTab('home')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="home-icon">
+        <path d="M3 9.5L10 3L17 9.5V17H13V13H7V17H3V9.5Z" fill="#1A56DB"/>
+      </svg>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-tab" id="tab-reviews" onclick="switchTab('reviews')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="reviews-icon">
+        <path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23.83-4.82L3 7.27l4.91-.71L10 2z" stroke="#9CA3AF" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav-label">Reviews</span>
+    </div>
+    <div class="nav-tab" id="tab-bookings" onclick="switchTab('bookings')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" id="bookings-icon">
+        <rect x="3" y="4" width="14" height="14" rx="2" stroke="#9CA3AF" stroke-width="1.5"/>
+        <path d="M7 4V2M13 4V2" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M3 8H17" stroke="#9CA3AF" stroke-width="1.5"/>
+        <path d="M7 12H10M7 15H13" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span class="nav-label">My Bookings</span>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  /* ── Toast ── */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ── Tab switching ── */
+  function switchTab(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+
+    // Update icon colours
+    const iconMap = {
+      home:     { el: 'home-icon',     type: 'fill' },
+      reviews:  { el: 'reviews-icon',  type: 'stroke' },
+      bookings: { el: 'bookings-icon', type: 'stroke' }
+    };
+    Object.entries(iconMap).forEach(([tab, cfg]) => {
+      const icon = document.getElementById(cfg.el);
+      if (!icon) return;
+      const active = tab === name;
+      const colour = active ? '#1A56DB' : '#9CA3AF';
+      if (cfg.type === 'fill') {
+        icon.querySelectorAll('[fill]').forEach(el => {
+          if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', colour);
+        });
+      } else {
+        icon.querySelectorAll('[stroke]').forEach(el => {
+          if (el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', colour);
+        });
+        // reviews star: also fill when active
+        if (cfg.el === 'reviews-icon' && active) {
+          icon.querySelectorAll('path').forEach(el => el.setAttribute('fill', '#1A56DB'));
+        } else if (cfg.el === 'reviews-icon') {
+          icon.querySelectorAll('path').forEach(el => el.setAttribute('fill', 'none'));
+        }
+      }
+    });
+  }
+
+  /* ── Category filter ── */
+  let activeCategory = 'all';
+  function setCategory(el, cat) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeCategory = cat;
+    filterCards();
+  }
+
+  /* ── Live search + category filter ── */
+  function filterCards() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('#cardList .card').forEach(card => {
+      const matchSearch = !q || (card.dataset.name || '').includes(q);
+      const matchCat    = activeCategory === 'all' || card.dataset.category === activeCategory;
+      const show = matchSearch && matchCat;
+      card.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    document.getElementById('noResults').classList.toggle('show', visible === 0);
+  }
+
+  /* ── Star rating ── */
+  let selectedRating = 0;
+  const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
+
+  function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.classList.toggle('lit', +btn.dataset.val <= val);
+    });
+    document.getElementById('ratingLabel').textContent = ratingLabels[val];
+    checkSubmit();
+  }
+
+  /* ── Char counter & submit guard ── */
+  function onTextInput() {
+    const txt = document.getElementById('reviewText').value;
+    const count = Math.min(txt.length, 300);
+    document.getElementById('charCount').textContent = count;
+    if (txt.length > 300) {
+      document.getElementById('reviewText').value = txt.slice(0, 300);
+      document.getElementById('charCount').textContent = 300;
+    }
+    checkSubmit();
+  }
+
+  function checkSubmit() {
+    const service = document.getElementById('reviewService').value;
+    const text    = document.getElementById('reviewText').value.trim();
+    const ok = service && selectedRating > 0 && text.length >= 10;
+    document.getElementById('submitBtn').disabled = !ok;
+  }
+
+  /* ── Submit review ── */
+  let reviewCount = 4;
+  function submitReview() {
+    const service = document.getElementById('reviewService').value;
+    const text    = document.getElementById('reviewText').value.trim();
+    const stars   = '★'.repeat(selectedRating) + '☆'.repeat(5 - selectedRating);
+    const colors  = ['#DBEAFE:#1A56DB','#FEF3C7:#D97706','#F0FDF4:#16A34A','#EDE9FE:#7C3AED','#FEE2E2:#DC2626'];
+    const [bg, fg] = colors[reviewCount % colors.length].split(':');
+    const initials = 'You';
+
+    const card = document.createElement('div');
+    card.className = 'review-card new-review';
+    card.innerHTML = `
+      <div class="review-card-header">
+        <div class="reviewer-avatar" style="background:${bg};color:${fg}">${initials}</div>
+        <div class="reviewer-info">
+          <div class="reviewer-name">You</div>
+          <div class="reviewer-meta">Just now</div>
+        </div>
+        <span class="review-stars">${stars.replace(/☆/g,'<span style="color:#D1D5DB">☆</span>')}</span>
+        <span class="review-service-tag">${service}</span>
+      </div>
+      <p class="review-text">${text}</p>
+    `;
+
+    const list = document.getElementById('reviewsList');
+    list.insertBefore(card, list.firstChild);
+
+    reviewCount++;
+    document.getElementById('reviewsCount').textContent = reviewCount + ' reviews';
+
+    // Reset form
+    document.getElementById('reviewService').value = '';
+    document.getElementById('reviewText').value = '';
+    document.getElementById('charCount').textContent = '0';
+    selectedRating = 0;
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+    document.getElementById('ratingLabel').textContent = 'Tap to rate';
+    document.getElementById('submitBtn').disabled = true;
+
+    showToast('✅ Review submitted — thank you!');
+
+    // Scroll to new review
+    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+  }
+
+  // Keep submit button in sync when service changes
+  document.getElementById('reviewService').addEventListener('change', checkSubmit);
+
+document.getElementById('reviewService').addEventListener('change', checkSubmit);
+
+/* ── Load reviews from backend ── */
+async function loadReviews() {
+  try {
+    const res = await fetch('http://localhost:5000/reviews');
+    const data = await res.json();
+
+    const list = document.getElementById('reviewsList');
+    list.innerHTML = '';
+
+    data.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'review-card';
+
+      const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+
+      card.innerHTML = `
+        <div class="review-card-header">
+          <div class="reviewer-avatar" style="background:#DBEAFE;color:#1A56DB">U</div>
+          <div class="reviewer-info">
+            <div class="reviewer-name">User</div>
+            <div class="reviewer-meta">${new Date(r.createdAt).toLocaleString()}</div>
+          </div>
+          <span class="review-stars">${stars}</span>
+          <span class="review-service-tag">${r.service}</span>
+        </div>
+        <p class="review-text">${r.text}</p>
+      `;
+
+      list.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+loadReviews();
+/* ── Menu toggle ── */
+function openMenu() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeMenu() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+</script>
+
+</body>
+</html>
