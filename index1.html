@@ -1,896 +1,1658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CityServe</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CityServe – Jharkhand</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --blue:#3b5bdb;--blue-dark:#2f4ac2;--blue-light:#e8f0fe;
-  --green:#0ca678;--green-light:#e6fcf5;
-  --orange:#e67700;--orange-light:#fff3e0;
-  --pink:#e64980;--pink-light:#fff0f6;
-  --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
-  --gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
-  --text:#1e293b;--white:#fff;
-  --radius:16px;--shadow:0 4px 24px rgba(0,0,0,.08);
+  --primary:#3b4fe4;--primary-dark:#2a3acf;--primary-light:#eef0fd;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#ef4444;--red-light:#fee2e2;
+  --amber:#f59e0b;--amber-light:#fef3c7;
+  --bg:#f0f2fa;--card:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;
+  --shadow:0 2px 12px rgba(59,79,228,.08);--r:16px;--rs:10px;
 }
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#eef2ff;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.phone-wrap{width:375px;height:812px;background:var(--white);border-radius:40px;overflow:hidden;position:relative;box-shadow:0 32px 80px rgba(59,91,219,.25)}
- 
-/* ── SCREENS ── */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:#f8fafc;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden;z-index:1}
-.screen.active{transform:translateX(0);z-index:2}
-.screen.slide-left{transform:translateX(-100%)}
- 
-/* ── HEADER ── */
-.header{background:var(--blue);padding:52px 20px 20px;color:var(--white);flex-shrink:0}
-.header-row{display:flex;justify-content:space-between;align-items:center}
-.logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;letter-spacing:-.3px}
-.logo-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.header-actions{display:flex;gap:10px}
-.icon-btn{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
-.icon-btn:active{transform:scale(.93)}
- 
-/* ── SEARCH ── */
-.search-bar{margin-top:14px;background:rgba(255,255,255,.15);border-radius:14px;padding:0 14px;display:flex;align-items:center;gap:10px;height:44px}
-.search-bar input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:inherit}
-.search-bar input::placeholder{color:rgba(255,255,255,.65)}
-.search-bar .mic{font-size:18px;cursor:pointer}
- 
-/* ── LOCATION ── */
-.location-bar{padding:10px 20px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600);background:var(--white);border-bottom:1px solid var(--gray-100)}
-.loc-dot{color:#e53e3e;font-size:14px}
-.loc-city{color:var(--blue);font-weight:600;cursor:pointer}
- 
-/* ── SCROLL BODY ── */
-.body{flex:1;overflow-y:auto;padding-bottom:80px}
-.body::-webkit-scrollbar{display:none}
- 
-/* ── CATEGORIES ── */
-.section-label{font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--gray-400);text-transform:uppercase;padding:16px 20px 8px}
-.cats{display:flex;gap:8px;padding:0 20px 4px;overflow-x:auto}
-.cats::-webkit-scrollbar{display:none}
-.cat-chip{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--white);color:var(--gray-600);box-shadow:0 2px 8px rgba(0,0,0,.06);transition:.15s}
-.cat-chip.active{background:var(--blue);color:#fff}
-.cat-chip:active{transform:scale(.95)}
- 
-/* ── MAP ── */
-.map-box{margin:12px 20px;border-radius:var(--radius);overflow:hidden;height:110px;background:linear-gradient(135deg,#c7d2fe 0%,#a5b4fc 100%);position:relative;cursor:pointer}
-.map-dot{width:12px;height:12px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 2px 8px rgba(59,91,219,.4);position:absolute}
-.map-btn{position:absolute;bottom:10px;left:10px;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
- 
-/* ── SERVICE CARD ── */
-.nearby-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:8px}
-.nearby-title{font-size:16px;font-weight:700;color:var(--text)}
-.see-all{font-size:13px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none;background:none;border:none;font-family:inherit}
- 
-.svc-card{background:var(--white);margin:0 20px 10px;border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;border:1.5px solid transparent}
-.svc-card:active{transform:scale(.98);border-color:var(--blue-light)}
-.svc-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.svc-info{flex:1;min-width:0}
-.svc-name-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.svc-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.badge-verified{background:#e6fcf5;color:#0ca678;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:flex;align-items:center;gap:3px;flex-shrink:0}
-.stars{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gray-600);margin-bottom:2px}
-.star-filled{color:#f59e0b}
-.svc-tagline{font-size:12px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.call-btn{padding:8px 14px;border-radius:10px;border:1.5px solid var(--blue);background:var(--white);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;transition:.15s}
-.call-btn.filled{background:var(--green);border-color:var(--green);color:#fff}
-.call-btn:active{transform:scale(.95)}
- 
-/* ── BOTTOM NAV ── */
-.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:70px;background:var(--white);border-top:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-around;padding:0 10px;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:10}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;transition:.15s;background:none;border:none;font-family:inherit}
-.nav-item:active{background:var(--blue-light)}
-.nav-icon{font-size:20px}
-.nav-label{font-size:10px;font-weight:600;color:var(--gray-400)}
-.nav-item.active .nav-icon{filter:drop-shadow(0 0 0 var(--blue))}
-.nav-item.active .nav-label{color:var(--blue)}
- 
-/* ── SERVICE DETAIL ── */
-.detail-header{height:220px;position:relative;flex-shrink:0;background:linear-gradient(135deg,#e8f0fe,#c7d2fe)}
-.detail-cover{width:100%;height:100%;object-fit:cover;display:block}
-.detail-back{position:absolute;top:48px;left:16px;width:36px;height:36px;background:rgba(255,255,255,.9);border-radius:12px;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
-.detail-fav{position:absolute;top:48px;right:16px;width:36px;height:36px;background:rgba(255,255,255,.9);border-radius:12px;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
- 
-.detail-card{margin:-20px 16px 0;background:#fff;border-radius:20px;padding:16px;box-shadow:var(--shadow);position:relative;z-index:2}
-.detail-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.detail-name{font-size:18px;font-weight:800;color:var(--text);line-height:1.2}
-.detail-open{background:var(--green-light);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;flex-shrink:0}
-.detail-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
-.detail-meta-item{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gray-600);font-weight:500}
- 
-.detail-tabs{display:flex;border-bottom:1.5px solid var(--gray-100);margin:16px 0 0;overflow-x:auto}
-.detail-tabs::-webkit-scrollbar{display:none}
-.tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--gray-400);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
-.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
- 
-.tab-panel{display:none;padding:16px 16px 0}
-.tab-panel.active{display:block}
- 
-/* about */
-.about-text{font-size:13px;line-height:1.7;color:var(--gray-600)}
-.info-list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-.info-row{display:flex;align-items:flex-start;gap:10px;font-size:13px}
-.info-icon{font-size:16px;flex-shrink:0;margin-top:1px}
-.info-val{color:var(--gray-600);line-height:1.5}
- 
-.services-list{display:flex;flex-direction:column;gap:8px}
-.svc-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--gray-50);border-radius:10px;font-size:13px}
-.svc-item-name{font-weight:600;color:var(--text)}
-.svc-item-price{color:var(--blue);font-weight:700}
- 
-/* reviews */
-.review-summary{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:14px;background:var(--blue-light);border-radius:14px}
-.review-score{font-size:40px;font-weight:800;color:var(--blue);line-height:1}
-.review-bars{flex:1}
-.rbar-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.rbar-label{font-size:11px;color:var(--gray-600);width:12px;text-align:right}
-.rbar-track{flex:1;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden}
-.rbar-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .5s}
-.rbar-count{font-size:11px;color:var(--gray-400);width:20px}
- 
-.review-card{padding:12px 0;border-bottom:1px solid var(--gray-100)}
-.review-card:last-child{border-bottom:none}
-.rv-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.rv-avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.rv-name{font-size:13px;font-weight:700;color:var(--text)}
-.rv-date{font-size:11px;color:var(--gray-400)}
-.rv-text{font-size:13px;color:var(--gray-600);line-height:1.6}
- 
-.add-review-btn{width:100%;padding:12px;border:1.5px dashed var(--blue);border-radius:12px;background:none;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;transition:.15s}
-.add-review-btn:active{background:var(--blue-light)}
- 
-/* photos */
-.photos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.photo-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:pointer;transition:.15s}
-.photo-img:active{transform:scale(.97)}
- 
-/* call bar */
-.call-bar{padding:12px 16px;border-top:1px solid var(--gray-100);display:flex;gap:10px;background:#fff;flex-shrink:0}
-.call-bar-btn{flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
-.call-bar-btn.primary{background:var(--blue);color:#fff}
-.call-bar-btn.secondary{background:var(--green-light);color:var(--green)}
-.call-bar-btn:active{transform:scale(.97)}
- 
-/* ── PROFILE SCREEN ── */
-.profile-header{background:var(--blue);padding:52px 20px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0}
-.profile-avatar{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.4);object-fit:cover}
-.profile-name{font-size:20px;font-weight:800;color:#fff}
-.profile-email{font-size:13px;color:rgba(255,255,255,.75)}
-.profile-loc{font-size:12px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px}
-.edit-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
- 
-.profile-stats{display:flex;background:#fff;margin:12px 20px;border-radius:var(--radius);box-shadow:var(--shadow)}
-.stat-item{flex:1;padding:14px;display:flex;flex-direction:column;align-items:center;gap:2px;border-right:1px solid var(--gray-100)}
-.stat-item:last-child{border-right:none}
-.stat-val{font-size:20px;font-weight:800;color:var(--blue)}
-.stat-lbl{font-size:11px;color:var(--gray-400);font-weight:600;text-align:center}
- 
-.profile-section{background:#fff;margin:0 20px 10px;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.ps-title{font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:.6px;text-transform:uppercase;padding:12px 16px 4px}
-.ps-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-100);cursor:pointer;transition:.15s}
-.ps-item:last-child{border-bottom:none}
-.ps-item:active{background:var(--gray-50)}
-.ps-icon{font-size:18px;width:30px;text-align:center}
-.ps-label{flex:1;font-size:14px;font-weight:600;color:var(--text)}
-.ps-arrow{color:var(--gray-400);font-size:14px}
-.ps-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
- 
-/* ── MENU / DRAWER ── */
-.drawer{position:absolute;top:0;bottom:0;right:0;width:280px;background:#fff;z-index:20;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.15)}
-.drawer.open{transform:translateX(0)}
-.drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:19;opacity:0;pointer-events:none;transition:opacity .3s}
-.drawer-overlay.open{opacity:1;pointer-events:auto}
-.drawer-header{background:var(--blue);padding:52px 20px 24px}
-.drawer-avatar{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,.4);margin-bottom:8px}
-.drawer-name{font-size:16px;font-weight:800;color:#fff}
-.drawer-email{font-size:12px;color:rgba(255,255,255,.7)}
-.drawer-items{padding:10px 0}
-.drawer-item{display:flex;align-items:center;gap:12px;padding:13px 20px;cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
-.drawer-item:active{background:var(--gray-50)}
-.di-icon{font-size:20px;width:28px;text-align:center}
-.di-label{font-size:14px;font-weight:600;color:var(--text)}
-.drawer-divider{height:1px;background:var(--gray-100);margin:6px 0}
- 
-/* ── MODAL ── */
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-overlay.open{opacity:1;pointer-events:auto}
-.modal{background:#fff;border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
-.modal-sub{font-size:13px;color:var(--gray-400);margin-bottom:16px}
-.modal-stars{display:flex;gap:8px;margin-bottom:14px}
-.modal-star{font-size:32px;cursor:pointer;filter:grayscale(1);transition:.1s}
-.modal-star.active{filter:none}
-.modal-textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:12px;padding:12px;font-size:13px;font-family:inherit;resize:none;outline:none;min-height:90px;color:var(--text)}
-.modal-textarea:focus{border-color:var(--blue)}
-.modal-submit{width:100%;margin-top:12px;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-.modal-submit:active{transform:scale(.98)}
-.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-400)}
- 
-/* helper */
-.stars-row{display:flex;align-items:center;gap:2px}
-.s{font-size:12px;color:#e2e8f0}.s.on{color:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:linear-gradient(135deg,#4a5fd4 0%,#7b8ee8 50%,#8899cc 100%);
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;padding:16px;
+}
+
+/* PHONE — fixed 16cm height ≈ 605px at 96dpi */
+.phone{
+  width:390px;
+  height:605px;        /* 16 cm */
+  background:var(--bg);
+  border-radius:42px;
+  overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.55),0 0 0 10px #1a1d2e,inset 0 0 0 2px #333;
+  display:flex;flex-direction:column;position:relative;
+}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;height:605px;overflow:hidden;animation:fadeIn .22s;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.scroll-body{flex:1;overflow-y:auto;padding:10px 10px 74px;}
+.scroll-body::-webkit-scrollbar{display:none;}
+.scroll-body.no-nav{padding-bottom:16px;}
+
+/* TOPNAV */
+.topnav{
+  background:var(--primary);
+  padding:12px 13px 9px;
+  display:flex;align-items:center;gap:7px;flex-shrink:0;
+}
+.logo-wrap{width:30px;height:30px;background:rgba(255,255,255,.18);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.brand{font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:#fff;flex:1;}
+.icon-btn{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;color:#fff;font-size:14px;position:relative;flex-shrink:0;}
+.badge{width:7px;height:7px;background:#ff3b30;border-radius:50%;position:absolute;top:3px;right:3px;border:1.5px solid var(--primary);}
+
+/* PAGE HEADER */
+.page-header{
+  background:var(--primary);padding:11px 13px;
+  display:flex;align-items:center;gap:9px;flex-shrink:0;
+}
+.page-header h2{color:#fff;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;flex:1;}
+.back-btn{
+  width:28px;height:28px;background:rgba(255,255,255,.22);
+  border-radius:7px;border:none;color:#fff;font-size:15px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s;
+}
+.back-btn:hover{background:rgba(255,255,255,.35);}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:absolute;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:5px 0 8px;z-index:100;
+}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:3px 0;}
+.nvi{font-size:17px;}
+.nvl{font-size:9px;font-weight:600;color:var(--muted);}
+.nav-item.active .nvi,.nav-item.active .nvl{color:var(--primary);}
+.nav-dot{width:4px;height:4px;background:var(--primary);border-radius:50%;display:none;}
+.nav-item.active .nav-dot{display:block;}
+
+/* SUBPAGES */
+.subpage{
+  position:absolute;inset:0;background:var(--bg);
+  display:none;flex-direction:column;z-index:50;
+  animation:slideIn .22s cubic-bezier(.4,0,.2,1);
+}
+.subpage.open{display:flex;}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+
+/* PANELS */
+.panel{position:absolute;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:60;}
+.panel.open{display:flex;animation:slideDown .2s cubic-bezier(.4,0,.2,1);}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+
+.menu-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;flex-direction:column;z-index:70;}
+.menu-overlay.open{display:flex;animation:fadeIn .2s;}
+.menu-sheet{background:#fff;padding:13px;flex-shrink:0;}
+.menu-item{display:flex;align-items:center;gap:11px;padding:11px 3px;border-bottom:1px solid var(--border);cursor:pointer;}
+.menu-item:last-child{border-bottom:none;}
+.mi-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.mi-label{font-size:13px;font-weight:600;color:var(--text);flex:1;}
+
+/* MODALS */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:flex-end;}
+.modal-overlay.open{display:flex;animation:fadeIn .2s;}
+.modal-sheet{
+  background:#fff;width:100%;border-radius:22px 22px 0 0;
+  padding:15px;max-height:88%;overflow-y:auto;
+  animation:slideUp .28s cubic-bezier(.4,0,.2,1);
+}
+.modal-sheet::-webkit-scrollbar{display:none;}
+.m-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px;}
+.m-title{font-size:15px;font-weight:800;color:var(--text);font-family:'Nunito',sans-serif;margin-bottom:3px;}
+.m-sub{font-size:11px;color:var(--muted);margin-bottom:12px;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* FORMS */
+.fg{margin-bottom:9px;}
+.fg label{font-size:10px;font-weight:700;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:9px 11px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;
+  outline:none;background:#fff;color:var(--text);transition:border-color .2s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--primary);}
+.fg textarea{resize:none;height:56px;}
+
+.primary-btn{
+  width:100%;padding:11px;background:var(--primary);color:#fff;border:none;
+  border-radius:11px;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:background .2s;
+}
+.primary-btn:hover{background:var(--primary-dark);}
+.secondary-btn{
+  width:100%;padding:9px;background:transparent;color:var(--primary);
+  border:2px solid var(--primary);border-radius:11px;font-size:13px;
+  font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:7px;
+}
+.m-cancel{
+  width:100%;padding:9px;background:transparent;color:var(--muted);
+  border:none;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;margin-top:5px;
+}
+.divider{text-align:center;margin:9px 0;font-size:11px;color:var(--muted);position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border);}
+.divider::before{left:0;}.divider::after{right:0;}
+
+/* ─── AUTH SCREEN ─────────────────────────────── */
+.auth-hero{
+  background:linear-gradient(148deg,var(--primary),#5b6cf8);
+  padding:26px 20px 38px;text-align:center;flex-shrink:0;
+  position:relative;
+}
+/* BACK BUTTON inside auth hero */
+.auth-back-btn{
+  position:absolute;top:12px;left:12px;
+  width:30px;height:30px;background:rgba(255,255,255,.22);
+  border-radius:8px;border:none;color:#fff;font-size:16px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.auth-back-btn:hover{background:rgba(255,255,255,.38);}
+
+.auth-logo{font-size:38px;margin-bottom:6px;}
+.auth-title{font-family:'Nunito',sans-serif;font-size:24px;font-weight:900;color:#fff;}
+.auth-sub{color:rgba(255,255,255,.72);font-size:11px;margin-top:2px;}
+
+.auth-body{flex:1;overflow-y:auto;padding:0 14px 18px;margin-top:-20px;}
+.auth-body::-webkit-scrollbar{display:none;}
+
+.auth-card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 28px rgba(0,0,0,.13);}
+.auth-tabs{display:flex;background:var(--bg);border-radius:9px;padding:3px;margin-bottom:13px;}
+.auth-tab{
+  flex:1;padding:7px;border:none;background:transparent;border-radius:7px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;
+  color:var(--muted);transition:all .2s;
+}
+.auth-tab.active{background:#fff;color:var(--primary);box-shadow:0 2px 7px rgba(0,0,0,.08);}
+
+.role-sel{display:flex;gap:7px;margin-bottom:11px;}
+.role-opt{
+  flex:1;padding:8px 5px;border:2px solid var(--border);
+  border-radius:9px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.role-opt.active{border-color:var(--primary);background:var(--primary-light);}
+.role-opt .r-icon{font-size:18px;display:block;margin-bottom:2px;}
+.role-opt .r-lbl{font-size:10px;font-weight:700;color:var(--text);}
+.role-opt.active .r-lbl{color:var(--primary);}
+
+.switch-auth{text-align:center;margin-top:10px;font-size:12px;color:var(--muted);}
+.switch-auth span{color:var(--primary);font-weight:700;cursor:pointer;}
+
+/* SEARCH */
+.search-wrap{
+  display:flex;align-items:center;background:#fff;border-radius:50px;
+  padding:8px 12px;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:9px;
+}
+.search-wrap .dot{width:7px;height:7px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.search-wrap input{flex:1;border:none;outline:none;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;background:transparent;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:9px;overflow-x:auto;padding-bottom:2px;}
+.filter-bar::-webkit-scrollbar{display:none;}
+.f-btn{
+  display:flex;align-items:center;gap:4px;padding:4px 10px;
+  border-radius:50px;border:1.5px solid var(--border);background:#fff;
+  font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;
+  color:var(--text);transition:all .18s;font-family:'DM Sans',sans-serif;flex-shrink:0;
+}
+.f-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.f-btn.loc-active{background:#059669;color:#fff;border-color:#059669;}
+
+/* SERVICE CARD */
+.service-card{
+  background:#fff;border-radius:var(--rs);padding:10px;
+  display:flex;align-items:center;gap:9px;margin-bottom:7px;
+  box-shadow:var(--shadow);cursor:pointer;transition:transform .12s;
+}
+.service-card:active{transform:scale(.98);}
+.svc-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.svc-name{font-size:13px;font-weight:700;color:var(--text);}
+.svc-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:1px;}
+.stars{color:#f59e0b;font-size:10px;}
+.svc-actions{display:flex;gap:5px;flex-shrink:0;}
+.btn-call{padding:5px 8px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;background:var(--primary-light);color:var(--primary);}
+.btn-book{padding:5px 8px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;background:var(--primary);color:#fff;}
+.cat-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:9px 0 4px;}
+.cat-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+.see-all{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;}
+
+/* MAP */
+.map-card{border-radius:var(--r);overflow:hidden;margin-bottom:9px;position:relative;height:140px;}
+.map-card iframe{width:100%;height:100%;border:none;pointer-events:none;}
+.map-view-btn{
+  position:absolute;bottom:8px;left:8px;background:#fff;border-radius:50px;
+  padding:4px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;
+  gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;color:var(--text);
+}
+.map-full{flex:1;position:relative;overflow:hidden;}
+.map-full iframe{width:100%;height:100%;border:none;}
+.map-search-bar{
+  position:absolute;top:10px;left:10px;right:10px;display:flex;
+  align-items:center;background:#fff;border-radius:50px;padding:7px 12px;
+  gap:7px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:10;
+}
+.map-search-bar input{flex:1;border:none;outline:none;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;background:transparent;}
+
+/* DETAIL */
+.detail-hero{background:var(--primary);padding:11px 13px 40px;flex-shrink:0;}
+.detail-hero h2{color:#fff;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;}
+.ver-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 9px;font-size:10px;color:#fff;font-weight:600;margin-top:4px;}
+.detail-body{flex:1;overflow-y:auto;padding:0 10px 74px;margin-top:-28px;}
+.detail-body::-webkit-scrollbar{display:none;}
+.photo-card{background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-bottom:9px;}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;height:130px;}
+.photo-main{grid-row:span 2;}
+.photo-slot{background:linear-gradient(135deg,#e8eeff,#d0d9f5);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.info-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden;}
+.info-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-icon{width:30px;height:30px;background:var(--primary-light);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.info-text .lbl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;}
+.info-text .val{font-size:12px;color:var(--text);font-weight:700;}
+.info-action{margin-left:auto;padding:4px 9px;background:var(--primary);color:#fff;border-radius:50px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.detail-acts{display:flex;gap:8px;margin:9px 0;}
+.detail-acts button{flex:1;padding:10px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+
+/* RATING */
+.rating-widget{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:8px;padding:12px;}
+.rating-widget h3{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.star-input{display:flex;gap:5px;font-size:24px;cursor:pointer;justify-content:center;}
+.star-input span{transition:transform .12s;display:inline-block;}
+.star-input span:hover{transform:scale(1.15);}
+.avg-row{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--border);}
+.avg-num{font-size:30px;font-weight:900;color:var(--text);font-family:'Nunito',sans-serif;line-height:1;}
+.avg-bars{flex:1;}
+.bar-row{display:flex;align-items:center;gap:4px;margin-bottom:2px;}
+.bar-lbl{font-size:9px;color:var(--muted);width:8px;}
+.bar-bg{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--amber);border-radius:2px;transition:width .5s;}
+.review-item{padding:8px 12px;border-bottom:1px solid var(--border);}
+.review-item:last-child{border-bottom:none;}
+.review-top{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.review-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
+.review-name{font-size:12px;font-weight:700;color:var(--text);}
+.review-txt{font-size:11px;color:var(--muted);line-height:1.45;}
+
+/* PROFILE */
+.profile-hero{
+  background:linear-gradient(140deg,var(--primary),#5b6cf8);
+  padding:20px 15px 36px;text-align:center;flex-shrink:0;
+}
+.profile-av{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.22);border:3px solid rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 7px;}
+.profile-name{color:#fff;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;}
+.profile-email{color:rgba(255,255,255,.72);font-size:11px;margin-top:2px;}
+.role-badge-pill{display:inline-block;background:rgba(255,255,255,.18);border-radius:20px;padding:3px 10px;font-size:10px;color:#fff;font-weight:700;margin-top:4px;}
+.profile-body{flex:1;overflow-y:auto;padding:0 10px 74px;margin-top:-22px;}
+.profile-body::-webkit-scrollbar{display:none;}
+.profile-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden;}
+.profile-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.profile-row:hover{background:#f9fafb;}
+.profile-row:last-child{border-bottom:none;}
+.p-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.p-label{flex:1;font-size:13px;font-weight:600;color:var(--text);}
+.p-arr{color:var(--muted);font-size:15px;}
+.p-badge{background:var(--primary);color:#fff;border-radius:50px;padding:2px 7px;font-size:9px;font-weight:800;margin-right:3px;}
+
+/* PROVIDER */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;}
+.stat-card{background:#fff;border-radius:var(--rs);padding:11px;box-shadow:var(--shadow);text-align:center;}
+.stat-num{font-size:22px;font-weight:900;color:var(--primary);font-family:'Nunito',sans-serif;}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;}
+.status-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:800;}
+.chip-pending{background:var(--amber-light);color:#92400e;}
+.chip-approved{background:var(--green-light);color:var(--green);}
+.chip-rejected{background:var(--red-light);color:var(--red);}
+.bk-card{background:#fff;border-radius:var(--rs);padding:11px;margin-bottom:7px;box-shadow:var(--shadow);}
+.bk-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bk-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.bk-status{margin-left:auto;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:800;}
+.confirmed{background:var(--green-light);color:var(--green);}
+.pending-s{background:var(--amber-light);color:#92400e;}
+.completed{background:#f3f4f6;color:var(--muted);}
+.cancelled{background:var(--red-light);color:var(--red);}
+.bk-acts{display:flex;gap:5px;}
+.bk-acts button{flex:1;padding:6px;border-radius:7px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* ADMIN */
+.admin-card{background:#fff;border-radius:var(--rs);box-shadow:var(--shadow);margin-bottom:7px;overflow:hidden;}
+.admin-row{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--border);}
+.admin-row:last-child{border-bottom:none;}
+.admin-acts{display:flex;gap:5px;}
+.approve-btn{padding:4px 9px;background:var(--green-light);color:var(--green);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;}
+.reject-btn{padding:4px 9px;background:var(--red-light);color:var(--red);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;}
+.delete-btn{padding:4px 9px;background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;}
+
+/* NOTIF */
+.notif-item{background:#fff;border-radius:var(--rs);padding:10px 12px;display:flex;gap:10px;margin-bottom:6px;cursor:pointer;box-shadow:var(--shadow);align-items:flex-start;}
+.notif-item.unread{border-left:3px solid var(--primary);}
+.n-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+
+/* CALL BOX */
+.ph-box{display:flex;align-items:center;gap:10px;padding:11px;background:var(--primary-light);border-radius:10px;margin-bottom:9px;}
+.ph-num{font-size:16px;font-weight:800;color:var(--primary);font-family:'Nunito',sans-serif;}
+.call-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+/* OFFERS */
+.offer-card{background:#fff;border-radius:var(--rs);padding:11px;margin-bottom:7px;box-shadow:var(--shadow);display:flex;align-items:center;gap:9px;}
+.offer-emoji{font-size:24px;flex-shrink:0;}
+.use-btn{padding:6px 10px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;}
+
+/* TOAST */
+.toast{
+  position:absolute;top:60px;left:10px;right:10px;
+  background:#111;color:#fff;border-radius:10px;padding:10px 13px;
+  font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .28s;
+  box-shadow:0 4px 18px rgba(0,0,0,.3);
+}
+.toast.show{opacity:1;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:30px 18px;color:var(--muted);}
+.empty-state .e-icon{font-size:40px;margin-bottom:8px;}
+.empty-state p{font-size:13px;}
+
+/* CONFIRM DIALOG */
+.confirm-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}
+.confirm-overlay.open{display:flex;animation:fadeIn .15s;}
+.confirm-box{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:300px;text-align:center;}
+.confirm-box h3{font-size:15px;font-weight:800;color:var(--text);margin-bottom:5px;font-family:'Nunito',sans-serif;}
+.confirm-box p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.confirm-acts{display:flex;gap:8px;}
+.confirm-acts button{flex:1;padding:10px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* SETTINGS */
+.set-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;}
+.set-row:last-child{border-bottom:none;}
+.s-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.s-lbl{flex:1;font-size:13px;font-weight:600;color:var(--text);}
+.s-val{font-size:11px;color:var(--muted);margin-right:4px;}
+.toggle{width:36px;height:20px;background:var(--border);border-radius:50px;position:relative;cursor:pointer;transition:background .22s;flex-shrink:0;}
+.toggle.on{background:var(--primary);}
+.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .22s;}
+.toggle.on::after{transform:translateX(16px);}
 </style>
 </head>
 <body>
-<div class="phone-wrap" id="app">
- 
-  <!-- ══ SCREEN: HOME ══════════════════════════════════════ -->
-  <div class="screen active" id="screen-home">
-    <div class="header">
-      <div class="header-row">
-        <div class="logo"><div class="logo-icon">🏙️</div> CityServe</div>
-        <div class="header-actions">
-          <button class="icon-btn" onclick="openDrawer()">☰</button>
-          <button class="icon-btn" onclick="goProfile()">👤</button>
-        </div>
-      </div>
-      <div class="search-bar">
-        <span>🔍</span>
-        <input id="search-input" placeholder='Search for "Electrician..."' oninput="filterServices(this.value)"/>
-        <span class="mic">🎙️</span>
-      </div>
-    </div>
- 
-    <div class="location-bar">
-      <span class="loc-dot">📍</span> Current location: <span class="loc-city">Patna, Bihar</span>
-    </div>
- 
-    <div class="body" id="home-body">
-      <div class="section-label">CATEGORIES</div>
-      <div class="cats" id="cat-list"></div>
- 
-      <div class="map-box">
-        <div class="map-dot" style="top:55%;left:48%"></div>
-        <div class="map-dot" style="top:38%;left:63%;width:9px;height:9px;background:#0ca678"></div>
-        <button class="map-btn">▲ Map view</button>
-      </div>
- 
-      <div class="nearby-header">
-        <span class="nearby-title">Nearby services</span>
-        <button class="see-all" onclick="filterServices('')">See all →</button>
-      </div>
-      <div id="svc-list"></div>
-    </div>
- 
-    <!-- bottom nav -->
-    <div class="bottom-nav">
-      <button class="nav-item active" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-      <button class="nav-item" onclick="goBookings()"><span class="nav-icon">📅</span><span class="nav-label">Bookings</span></button>
-      <button class="nav-item" onclick="goSaved()"><span class="nav-icon">❤️</span><span class="nav-label">Saved</span></button>
-      <button class="nav-item" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+<div class="phone">
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMsg">This action cannot be undone.</p>
+    <div class="confirm-acts">
+      <button style="background:var(--bg);color:var(--text);" onclick="closeConfirm()">Cancel</button>
+      <button style="background:var(--red);color:#fff;" id="confirmOkBtn">Delete</button>
     </div>
   </div>
- 
-  <!-- ══ SCREEN: SERVICE DETAIL ════════════════════════════ -->
-  <div class="screen" id="screen-detail">
-    <div class="detail-header" id="detail-header">
-      <button class="detail-back" onclick="goBack()">←</button>
-      <button class="detail-fav" id="fav-btn" onclick="toggleFav()">🤍</button>
+</div>
+
+<!-- CALL MODAL -->
+<div class="modal-overlay" id="callModal" onclick="if(event.target===this)closeModal('callModal')">
+  <div class="modal-sheet">
+    <div class="m-handle"></div>
+    <div class="m-title" id="cmName"></div>
+    <div class="m-sub">📍 CityServe · Verified Listing</div>
+    <div class="ph-box">
+      <div style="font-size:22px;">📞</div>
+      <div><div class="ph-num" id="cmNum"></div><div style="font-size:11px;color:var(--muted);">Business Number</div></div>
     </div>
- 
-    <div class="detail-card" id="detail-card">
-      <!-- filled by JS -->
-    </div>
- 
-    <div class="detail-tabs" id="detail-tabs">
-      <button class="tab active" onclick="switchTab(0)">About</button>
-      <button class="tab" onclick="switchTab(1)">Services</button>
-      <button class="tab" onclick="switchTab(2)">Reviews</button>
-      <button class="tab" onclick="switchTab(3)">Photos</button>
-    </div>
- 
-    <div class="body" style="padding-bottom:90px">
-      <div class="tab-panel active" id="tab-about"></div>
-      <div class="tab-panel" id="tab-services"></div>
-      <div class="tab-panel" id="tab-reviews"></div>
-      <div class="tab-panel" id="tab-photos"></div>
-    </div>
- 
-    <div class="call-bar" id="call-bar"></div>
+    <button class="call-btn" onclick="dialCall()">📲 Call Now</button>
+    <button class="m-cancel" onclick="closeModal('callModal')">Cancel</button>
   </div>
- 
-  <!-- ══ SCREEN: PROFILE ═══════════════════════════════════ -->
-  <div class="screen" id="screen-profile">
-    <div class="profile-header">
-      <img class="profile-avatar" id="p-avatar" src="" alt=""/>
-      <div class="profile-name" id="p-name"></div>
-      <div class="profile-email" id="p-email"></div>
-      <div class="profile-loc" id="p-loc"></div>
-      <button class="edit-btn">✏️ Edit Profile</button>
-    </div>
-    <div class="body">
-      <div class="profile-stats">
-        <div class="stat-item"><span class="stat-val" id="st-bookings">0</span><span class="stat-lbl">Bookings</span></div>
-        <div class="stat-item"><span class="stat-val" id="st-saved">0</span><span class="stat-lbl">Saved</span></div>
-        <div class="stat-item"><span class="stat-val" id="st-reviews">0</span><span class="stat-lbl">Reviews</span></div>
-      </div>
- 
-      <div class="profile-section">
-        <div class="ps-title">Account</div>
-        <div class="ps-item"><span class="ps-icon">📱</span><span class="ps-label" id="p-phone"></span><span class="ps-arrow">›</span></div>
-        <div class="ps-item"><span class="ps-icon">📧</span><span class="ps-label" id="p-email2"></span><span class="ps-arrow">›</span></div>
-        <div class="ps-item"><span class="ps-icon">📍</span><span class="ps-label" id="p-loc2"></span><span class="ps-arrow">›</span></div>
-      </div>
- 
-      <div class="profile-section">
-        <div class="ps-title">Activity</div>
-        <div class="ps-item" onclick="goBookings()"><span class="ps-icon">📅</span><span class="ps-label">My Bookings</span><span class="ps-badge" id="booking-badge">0</span><span class="ps-arrow">›</span></div>
-        <div class="ps-item" onclick="goSaved()"><span class="ps-icon">❤️</span><span class="ps-label">Saved Services</span><span class="ps-arrow">›</span></div>
-      </div>
- 
-      <div class="profile-section">
-        <div class="ps-title">Settings</div>
-        <div class="ps-item"><span class="ps-icon">🔔</span><span class="ps-label">Notifications</span><span class="ps-arrow">›</span></div>
-        <div class="ps-item"><span class="ps-icon">🔒</span><span class="ps-label">Privacy & Security</span><span class="ps-arrow">›</span></div>
-        <div class="ps-item"><span class="ps-icon">🌐</span><span class="ps-label">Language</span><span class="ps-arrow">›</span></div>
-        <div class="ps-item"><span class="ps-icon">❓</span><span class="ps-label">Help & Support</span><span class="ps-arrow">›</span></div>
-        <div class="ps-item" style="color:#e53e3e"><span class="ps-icon">🚪</span><span class="ps-label" style="color:#e53e3e">Logout</span><span class="ps-arrow" style="color:#e53e3e">›</span></div>
-      </div>
-    </div>
-    <div class="bottom-nav">
-      <button class="nav-item" onclick="goHome()"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-      <button class="nav-item" onclick="goBookings()"><span class="nav-icon">📅</span><span class="nav-label">Bookings</span></button>
-      <button class="nav-item" onclick="goSaved()"><span class="nav-icon">❤️</span><span class="nav-label">Saved</span></button>
-      <button class="nav-item active" onclick="goProfile()"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
-    </div>
-    <button style="position:absolute;top:48px;left:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
+</div>
+
+<!-- BOOK MODAL -->
+<div class="modal-overlay" id="bookModal" onclick="if(event.target===this)closeModal('bookModal')">
+  <div class="modal-sheet">
+    <div class="m-handle"></div>
+    <div class="m-title">Book a Service</div>
+    <div class="m-sub" id="bmSub"></div>
+    <div class="fg"><label>Your Name</label><input type="text" id="bkName" placeholder="Full name"></div>
+    <div class="fg"><label>Phone Number</label><input type="tel" id="bkPhone" placeholder="+91 XXXXX XXXXX"></div>
+    <div class="fg"><label>Date &amp; Time</label><input type="datetime-local" id="bkDate"></div>
+    <div class="fg"><label>Address</label><input type="text" id="bkAddr" placeholder="Your address"></div>
+    <div class="fg"><label>Note (Optional)</label><textarea id="bkNote" placeholder="Special requirements..."></textarea></div>
+    <button class="primary-btn" onclick="submitBook()">Confirm Booking</button>
+    <button class="m-cancel" onclick="closeModal('bookModal')">Cancel</button>
   </div>
- 
-  <!-- ══ SCREEN: BOOKINGS ═══════════════════════════════════ -->
-  <div class="screen" id="screen-bookings">
-    <div class="header">
-      <div class="header-row">
-        <button style="background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
-        <span style="font-size:18px;font-weight:800;color:#fff">My Bookings</span>
-        <div style="width:36px"></div>
+</div>
+
+<!-- RATING MODAL -->
+<div class="modal-overlay" id="ratingModal" onclick="if(event.target===this)closeModal('ratingModal')">
+  <div class="modal-sheet">
+    <div class="m-handle"></div>
+    <div class="m-title">Rate &amp; Review</div>
+    <div class="m-sub" id="rmSub"></div>
+    <div style="margin-bottom:11px;">
+      <div class="star-input" id="starInput">
+        <span onclick="setRating(1)">☆</span><span onclick="setRating(2)">☆</span>
+        <span onclick="setRating(3)">☆</span><span onclick="setRating(4)">☆</span>
+        <span onclick="setRating(5)">☆</span>
       </div>
     </div>
-    <div class="body" id="bookings-body"></div>
+    <div class="fg"><label>Your Comment</label><textarea id="ratingComment" placeholder="Tell others about your experience..."></textarea></div>
+    <button class="primary-btn" onclick="submitRating()">Submit Review</button>
+    <button class="m-cancel" onclick="closeModal('ratingModal')">Cancel</button>
   </div>
- 
-  <!-- ══ SCREEN: SAVED ══════════════════════════════════════ -->
-  <div class="screen" id="screen-saved">
-    <div class="header">
-      <div class="header-row">
-        <button style="background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer" onclick="goBack()">←</button>
-        <span style="font-size:18px;font-weight:800;color:#fff">Saved Services</span>
-        <div style="width:36px"></div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div class="panel" id="notifPanel">
+  <div class="topnav">
+    <button class="back-btn" onclick="closePanel('notifPanel')">←</button>
+    <span style="color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;flex:1;">Notifications</span>
+    <button class="icon-btn" style="width:auto;padding:0 8px;font-size:11px;font-weight:700;" onclick="clearNotifs()">Clear All</button>
+  </div>
+  <div class="scroll-body no-nav" id="notifList"></div>
+</div>
+
+<!-- MENU PANEL -->
+<div class="menu-overlay" id="menuPanel" onclick="if(event.target===this)closePanel('menuPanel')">
+  <div class="menu-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--text);">Menu</div>
+      <button style="border:none;background:none;font-size:17px;cursor:pointer;" onclick="closePanel('menuPanel')">✕</button>
+    </div>
+    <div class="menu-item" onclick="closePanel('menuPanel');goScreen('screen-home')"><div class="mi-icon" style="background:#eef0fd;">🏠</div><div class="mi-label">Home</div><span style="color:var(--muted)">›</span></div>
+    <div class="menu-item" onclick="closePanel('menuPanel');goScreen('screen-map')"><div class="mi-icon" style="background:#fef9c3;">🗺️</div><div class="mi-label">Map View</div><span style="color:var(--muted)">›</span></div>
+    <div class="menu-item" onclick="closePanel('menuPanel');goScreen('screen-services')"><div class="mi-icon" style="background:#dcfce7;">🛎️</div><div class="mi-label">All Services</div><span style="color:var(--muted)">›</span></div>
+    <div class="menu-item" onclick="closePanel('menuPanel');openSP('sp-bookings')"><div class="mi-icon" style="background:#fce7f3;">📅</div><div class="mi-label">My Bookings</div><span style="color:var(--muted)">›</span></div>
+    <div class="menu-item" onclick="closePanel('menuPanel');openSP('sp-offers')"><div class="mi-icon" style="background:#fff7ed;">🎁</div><div class="mi-label">Offers &amp; Deals</div><span style="color:var(--muted)">›</span></div>
+    <div id="menuAdmin" class="menu-item" style="display:none;" onclick="closePanel('menuPanel');goScreen('screen-admin')"><div class="mi-icon" style="background:#fee2e2;">🛡️</div><div class="mi-label" style="color:var(--red)">Admin Panel</div><span style="color:var(--red)">›</span></div>
+    <div id="menuProvider" class="menu-item" style="display:none;" onclick="closePanel('menuPanel');goScreen('screen-provider')"><div class="mi-icon" style="background:#dcfce7;">🏪</div><div class="mi-label" style="color:var(--green)">Provider Dashboard</div><span style="color:var(--green)">›</span></div>
+  </div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div class="screen active" id="screen-home">
+  <div class="topnav">
+    <div class="logo-wrap">🏙️</div>
+    <div class="brand">CityServe</div>
+    <button class="icon-btn" onclick="openNotifs()">🔔<span class="badge" id="notifBadge" style="display:none;"></span></button>
+    <button class="icon-btn" onclick="openPanel('menuPanel')">☰</button>
+  </div>
+  <div class="scroll-body">
+    <div style="padding:4px 1px 8px;">
+      <div style="font-size:13px;color:var(--muted);">Hello, <strong id="homeGreetName" style="color:var(--text);">Guest</strong> 👋</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:1px;">📍 Jharkhand, India</div>
+    </div>
+    <div class="search-wrap">
+      <div class="dot"></div>
+      <input type="text" id="homeSearch" oninput="renderHome()" placeholder='Search "electrician", "pizza"...'>
+      <span>🔍</span>
+    </div>
+    <div class="filter-bar" id="homeCatFilter"></div>
+    <div class="filter-bar" id="homeLocFilter"></div>
+    <div class="map-card" onclick="goScreen('screen-map')" style="cursor:pointer;">
+      <iframe src="https://maps.google.com/maps?q=Jharkhand,India&t=&z=8&ie=UTF8&iwloc=&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <button class="map-view-btn" onclick="event.stopPropagation();goScreen('screen-map')">📍 Full Map View</button>
+    </div>
+    <div class="sec-hdr">
+      <span class="sec-label">Nearby Services</span>
+      <a class="see-all" onclick="goScreen('screen-services')">See all →</a>
+    </div>
+    <div id="servicesList"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="navTo(this,'screen-home')"><div class="nvi">🏠</div><div class="nvl">Home</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-map')"><div class="nvi">🗺️</div><div class="nvl">Map</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-services')"><div class="nvi">🛎️</div><div class="nvl">Services</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-profile')"><div class="nvi">👤</div><div class="nvl">Profile</div><div class="nav-dot"></div></div>
+  </div>
+</div>
+
+<!-- ═══ AUTH ═══ -->
+<div class="screen" id="screen-auth">
+  <!-- HERO with BACK BUTTON -->
+  <div class="auth-hero">
+    <button class="auth-back-btn" onclick="goBack()" title="Go Back">&#8592;</button>
+    <div class="auth-logo">🏙️</div>
+    <div class="auth-title">CityServe</div>
+    <div class="auth-sub">Local Services · Jharkhand</div>
+  </div>
+
+  <div class="auth-body">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
       </div>
-    </div>
-    <div class="body" id="saved-body" style="padding-top:12px"></div>
-  </div>
- 
-  <!-- ══ DRAWER / MENU ══════════════════════════════════════ -->
-  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-  <div class="drawer" id="drawer">
-    <div class="drawer-header">
-      <img class="drawer-avatar" id="d-avatar" src="" alt=""/>
-      <div class="drawer-name" id="d-name"></div>
-      <div class="drawer-email" id="d-email"></div>
-    </div>
-    <div class="drawer-items" id="drawer-items"></div>
-  </div>
- 
-  <!-- ══ REVIEW MODAL ═══════════════════════════════════════ -->
-  <div class="modal-overlay" id="review-modal">
-    <div class="modal" style="position:relative">
-      <button class="modal-close" onclick="closeReviewModal()">×</button>
-      <div class="modal-title">Write a Review</div>
-      <div class="modal-sub">Share your experience</div>
-      <div class="modal-stars" id="modal-stars"></div>
-      <textarea class="modal-textarea" id="review-text" placeholder="Tell others what you experienced..."></textarea>
-      <button class="modal-submit" onclick="submitReview()">Submit Review</button>
-    </div>
-  </div>
- 
-</div><!-- /phone-wrap -->
- 
-<script>
-// ════════════════════════════════════════════════
-//  BACKEND DATA (inline — same as cityserve-backend.js)
-// ════════════════════════════════════════════════
-const DB = {
-  user: {
-    id:"usr_001",name:"Rahul Sharma",email:"rahul.sharma@email.com",
-    phone:"+91 98765 43210",
-    avatar:"https://ui-avatars.com/api/?name=Rahul+Sharma&background=3b5bdb&color=fff&size=200",
-    location:{city:"Patna",state:"Bihar"},
-    savedServices:["svc_001","svc_003"],
-    bookings:["bkg_001","bkg_002"],verified:true
-  },
-  menuItems:[
-    {id:"mn_01",label:"My Profile",   icon:"👤",action:"goProfile"},
-    {id:"mn_02",label:"My Bookings",  icon:"📅",action:"goBookings"},
-    {id:"mn_03",label:"Saved",        icon:"❤️", action:"goSaved"},
-    {id:"mn_04",label:"Notifications",icon:"🔔",action:null},
-    {id:"mn_05",label:"Payments",     icon:"💳",action:null},
-    {id:"mn_06",label:"Help & Support",icon:"🛟",action:null},
-    {id:"mn_07",label:"Settings",     icon:"⚙️", action:null},
-    {id:"mn_08",label:"Logout",       icon:"🚪",action:null},
-  ],
-  categories:[
-    {id:"cat_all",label:"All",emoji:"✨"},
-    {id:"cat_repair",label:"Repair",emoji:"🔧"},
-    {id:"cat_food",label:"Food",emoji:"🍕"},
-    {id:"cat_clean",label:"Cleaning",emoji:"🧹"},
-    {id:"cat_beauty",label:"Beauty",emoji:"💅"},
-  ],
-  services:[
-    {
-      id:"svc_001",name:"ABC Electrician",category:"cat_repair",
-      tagline:"Electrical repairs & wiring",
-      description:"ABC Electrician has been serving Patna since 2015. We specialise in residential and commercial electrical work — from simple socket repairs to full house wiring, MCB fitting, inverter installation, and CCTV wiring. All our technicians are ITI-certified and carry genuine spare parts.",
-      rating:4.0,reviewCount:128,distance:1.2,verified:true,
-      phone:"+91 87654 32109",whatsapp:"+91 87654 32109",
-      address:"Shop 12, Boring Road, Patna, Bihar 800001",
-      openNow:true,hours:"Mon–Sat 8 AM – 8 PM, Sun 9 AM – 5 PM",
-      priceRange:"₹200 – ₹5,000",icon:"⚡",iconBg:"#e8f0fe",iconColor:"#3b5bdb",
-      photos:[
-        "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=80",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80",
-        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80",
-      ],
-      services:[
-        {name:"Wiring & Rewiring",price:"₹500 onwards"},
-        {name:"Socket / Switch Repair",price:"₹200"},
-        {name:"MCB / Fuse Box",price:"₹350"},
-        {name:"Inverter Installation",price:"₹800"},
-        {name:"Fan Installation",price:"₹250"},
-        {name:"CCTV Wiring",price:"₹1,200 onwards"},
-      ],
-      reviews:[
-        {id:"rv_01",user:"Priya M.",avatar:"PM",rating:5,date:"2026-03-20",text:"Excellent work! Fixed our wiring issue in under an hour. Very professional."},
-        {id:"rv_02",user:"Anil K.",avatar:"AK",rating:4,date:"2026-02-14",text:"Good service. A bit late but the work quality was great."},
-        {id:"rv_03",user:"Sunita R.",avatar:"SR",rating:4,date:"2026-01-30",text:"Reasonable price and quick turnaround. Will use again."},
-        {id:"rv_04",user:"Deepak V.",avatar:"DV",rating:3,date:"2025-12-10",text:"Average experience. Work was done but communication could improve."},
-      ],
-    },
-    {
-      id:"svc_002",name:"QuickFix Repair",category:"cat_repair",
-      tagline:"Home appliance repairs",
-      description:"QuickFix Repair is your one-stop shop for all home appliance issues. We repair washing machines, refrigerators, ACs, microwaves, geysers, and more. With 10+ years in the business and 500+ satisfied customers, we offer a 30-day service warranty on every job.",
-      rating:3.0,reviewCount:64,distance:2.0,verified:false,
-      phone:"+91 76543 21098",whatsapp:"+91 76543 21098",
-      address:"45 Gandhi Maidan, Patna, Bihar 800001",
-      openNow:true,hours:"Mon–Sun 9 AM – 7 PM",
-      priceRange:"₹300 – ₹3,000",icon:"🔧",iconBg:"#fff3e0",iconColor:"#e67700",
-      photos:[
-        "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=80",
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-      ],
-      services:[
-        {name:"Washing Machine Repair",price:"₹500 onwards"},
-        {name:"Refrigerator Repair",price:"₹400 onwards"},
-        {name:"AC Service",price:"₹700"},
-        {name:"Microwave Repair",price:"₹350"},
-        {name:"Geyser Repair",price:"₹300"},
-      ],
-      reviews:[
-        {id:"rv_05",user:"Rohit S.",avatar:"RS",rating:3,date:"2026-03-05",text:"Got the job done but took longer than quoted."},
-        {id:"rv_06",user:"Kavita P.",avatar:"KP",rating:3,date:"2026-01-18",text:"Average service. Parts were expensive."},
-        {id:"rv_07",user:"Mohan L.",avatar:"ML",rating:4,date:"2025-11-22",text:"Fixed my AC perfectly. Happy with the result."},
-      ],
-    },
-    {
-      id:"svc_003",name:"Sharma Plumbing",category:"cat_repair",
-      tagline:"Pipes, leaks & drainage",
-      description:"Sharma Plumbing offers fast and reliable plumbing services across Patna. Whether it's a leaky tap, blocked drain, bathroom fitting, or full pipeline installation — we handle it all. Available 24/7 for emergency calls.",
-      rating:5.0,reviewCount:212,distance:0.8,verified:true,
-      phone:"+91 65432 10987",whatsapp:"+91 65432 10987",
-      address:"Near Patna Junction, Patna, Bihar 800001",
-      openNow:true,hours:"24 × 7",
-      priceRange:"₹150 – ₹8,000",icon:"🪠",iconBg:"#e6fcf5",iconColor:"#0ca678",
-      photos:[
-        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80",
-        "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80",
-        "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=80",
-      ],
-      services:[
-        {name:"Leak Repair",price:"₹150 onwards"},
-        {name:"Drain Unblocking",price:"₹300"},
-        {name:"Tap / Faucet Fitting",price:"₹250"},
-        {name:"Pipeline Installation",price:"₹1,500 onwards"},
-        {name:"Bathroom Fitting",price:"₹2,000 onwards"},
-        {name:"Water Tank Cleaning",price:"₹800"},
-      ],
-      reviews:[
-        {id:"rv_08",user:"Anjali T.",avatar:"AT",rating:5,date:"2026-04-01",text:"Absolutely fantastic! Came at midnight for an emergency — highly recommend."},
-        {id:"rv_09",user:"Raju D.",avatar:"RD",rating:5,date:"2026-03-15",text:"Best plumber in Patna. Very honest pricing and great work."},
-        {id:"rv_10",user:"Neha G.",avatar:"NG",rating:5,date:"2026-02-28",text:"Fixed a major pipeline leak quickly. No mess left behind."},
-        {id:"rv_11",user:"Sanjay B.",avatar:"SB",rating:5,date:"2026-01-10",text:"Exceptional service. Will always call Sharma Plumbing first."},
-      ],
-    },
-    {
-      id:"svc_004",name:"FreshBite Tiffin",category:"cat_food",
-      tagline:"Home-cooked meals delivered",
-      description:"FreshBite delivers fresh, home-style tiffin daily across Patna. Monthly, weekly, and daily subscription plans. Vegetarian and non-vegetarian options. Made fresh every day with zero preservatives.",
-      rating:4.5,reviewCount:95,distance:1.5,verified:true,
-      phone:"+91 99887 76655",whatsapp:"+91 99887 76655",
-      address:"12 Rajendra Nagar, Patna, Bihar 800016",
-      openNow:true,hours:"Delivery: 12 PM–2 PM & 7 PM–9 PM",
-      priceRange:"₹80 – ₹150 per meal",icon:"🍱",iconBg:"#fff0f6",iconColor:"#e64980",
-      photos:[
-        "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80",
-        "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&q=80",
-      ],
-      services:[
-        {name:"Daily Tiffin (Veg)",price:"₹80/meal"},
-        {name:"Daily Tiffin (Non-Veg)",price:"₹120/meal"},
-        {name:"Monthly Subscription",price:"₹1,800/month"},
-        {name:"Special Thali",price:"₹150/meal"},
-      ],
-      reviews:[
-        {id:"rv_12",user:"Meera P.",avatar:"MP",rating:5,date:"2026-03-28",text:"Tastes just like home. On time every day!"},
-        {id:"rv_13",user:"Gaurav S.",avatar:"GS",rating:4,date:"2026-02-20",text:"Good food and reasonable price. Recommended."},
-      ],
-    },
-  ],
-  bookings:[
-    {id:"bkg_001",serviceId:"svc_001",status:"completed",scheduledAt:"2026-03-25",issue:"Fan not working in bedroom",amount:450,rating:4},
-    {id:"bkg_002",serviceId:"svc_003",status:"upcoming",scheduledAt:"2026-04-12",issue:"Kitchen tap leaking",amount:250,rating:null},
-  ],
-};
- 
-// ════════════════════════════════════════════════
-//  API LAYER
-// ════════════════════════════════════════════════
-const API = {
-  getProfile: () => ({...DB.user}),
-  getMenuItems: () => [...DB.menuItems],
-  getCategories: () => [...DB.categories],
-  getAllServices: (cat="cat_all", q="") => {
-    let list = DB.services;
-    if(cat && cat!=="cat_all") list=list.filter(s=>s.category===cat);
-    if(q) list=list.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.tagline.toLowerCase().includes(q.toLowerCase()));
-    return list;
-  },
-  getServiceById: id => DB.services.find(s=>s.id===id)||null,
-  getBookings: () => DB.bookings.map(b=>({...b,service:API.getServiceById(b.serviceId)})),
-  getSaved: () => DB.user.savedServices.map(id=>API.getServiceById(id)).filter(Boolean),
-  toggleSaved: id => {
-    const idx=DB.user.savedServices.indexOf(id);
-    if(idx===-1) DB.user.savedServices.push(id);
-    else DB.user.savedServices.splice(idx,1);
-    return DB.user.savedServices.includes(id);
-  },
-  addReview: (svcId,{rating,text}) => {
-    const svc=DB.services.find(s=>s.id===svcId); if(!svc) return null;
-    const rv={id:`rv_${Date.now()}`,user:DB.user.name,avatar:DB.user.name.split(" ").map(n=>n[0]).join(""),rating,date:new Date().toISOString().split("T")[0],text};
-    svc.reviews.unshift(rv);
-    const total=svc.reviews.reduce((s,r)=>s+r.rating,0);
-    svc.rating=Math.round(total/svc.reviews.length*10)/10;
-    svc.reviewCount=svc.reviews.length;
-    return rv;
-  },
-};
- 
-// ════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════
-let currentScreen="home";
-let history=[];
-let activeCat="cat_all";
-let currentSvc=null;
-let activeTab=0;
-let modalRating=0;
- 
-// ════════════════════════════════════════════════
-//  NAVIGATION
-// ════════════════════════════════════════════════
-function showScreen(id,push=true){
-  const prev=document.querySelector(".screen.active");
-  if(prev) prev.classList.remove("active");
-  const next=document.getElementById("screen-"+id);
-  next.classList.add("active");
-  if(push && currentScreen!==id) history.push(currentScreen);
-  currentScreen=id;
-}
-function goBack(){
-  if(history.length){const prev=history.pop();showScreen(prev,false);}
-}
-function goHome(){showScreen("home",false);history=[];}
-function goProfile(){renderProfile();showScreen("profile");}
-function goBookings(){renderBookings();showScreen("bookings");}
-function goSaved(){renderSaved();showScreen("saved");}
- 
-// ════════════════════════════════════════════════
-//  RENDER HOME
-// ════════════════════════════════════════════════
-function renderCategories(){
-  const el=document.getElementById("cat-list");
-  el.innerHTML=API.getCategories().map(c=>`
-    <button class="cat-chip${c.id===activeCat?' active':''}" onclick="selectCat('${c.id}')">
-      ${c.emoji} ${c.label}
-    </button>`).join("");
-}
-function selectCat(id){
-  activeCat=id;
-  renderCategories();
-  renderServices(API.getAllServices(id));
-}
-function filterServices(q){
-  renderServices(API.getAllServices(activeCat,q));
-}
-function renderServices(list){
-  const el=document.getElementById("svc-list");
-  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">No services found</div>`;return;}
-  el.innerHTML=list.map(s=>serviceCard(s)).join("");
-}
-function serviceCard(s){
-  const stars=starsHtml(s.rating);
-  const isSaved=DB.user.savedServices.includes(s.id);
-  const filled=s.rating>=4.5?"filled":"";
-  return `<div class="svc-card" onclick="openDetail('${s.id}')">
-    <div class="svc-icon" style="background:${s.iconBg}">${s.icon}</div>
-    <div class="svc-info">
-      <div class="svc-name-row">
-        <span class="svc-name">${s.name}</span>
-        ${s.verified?`<span class="badge-verified">✓ Verified</span>`:""}
+
+      <!-- LOGIN FORM -->
+      <div id="form-login">
+        <div class="fg"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
+        <div class="fg"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+        <button class="primary-btn" onclick="doLogin()">Login →</button>
+        <div class="divider">or</div>
+        <button class="secondary-btn" onclick="doGuestLogin()">Continue as Guest</button>
+        <div class="switch-auth">No account? <span onclick="switchAuthTab('register')">Register</span></div>
       </div>
-      <div class="stars">${stars} ${s.rating.toFixed(1)} · ${s.distance}km</div>
-      <div class="svc-tagline">${s.tagline}</div>
-    </div>
-    <button class="call-btn ${filled}" onclick="event.stopPropagation();callService('${s.phone}')">Call now</button>
-  </div>`;
-}
-function starsHtml(r){
-  return [1,2,3,4,5].map(i=>`<span class="s${i<=Math.round(r)?' on':''}">★</span>`).join("");
-}
- 
-// ════════════════════════════════════════════════
-//  SERVICE DETAIL
-// ════════════════════════════════════════════════
-function openDetail(id){
-  currentSvc=API.getServiceById(id);
-  if(!currentSvc) return;
-  renderDetail(currentSvc);
-  switchTab(0);
-  showScreen("detail");
-}
-function renderDetail(s){
-  // header bg
-  const hdr=document.getElementById("detail-header");
-  hdr.style.background=`linear-gradient(135deg, ${s.iconBg}, ${s.iconColor}22)`;
-  hdr.innerHTML=`
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;opacity:.2">${s.icon}</div>
-    <button class="detail-back" onclick="goBack()">←</button>
-    <button class="detail-fav" id="fav-btn" onclick="toggleFav()">${DB.user.savedServices.includes(s.id)?'❤️':'🤍'}</button>`;
- 
-  // card
-  const stars=starsHtml(s.rating);
-  document.getElementById("detail-card").innerHTML=`
-    <div class="detail-title-row">
-      <div class="detail-name">${s.icon} ${s.name}</div>
-      ${s.openNow?`<div class="detail-open">Open Now</div>`:`<div class="detail-open" style="background:#fee2e2;color:#e53e3e">Closed</div>`}
-    </div>
-    <div class="detail-meta">
-      <div class="detail-meta-item">${stars} <b>${s.rating}</b> (${s.reviewCount})</div>
-      <div class="detail-meta-item">📍 ${s.distance} km</div>
-      <div class="detail-meta-item">💰 ${s.priceRange}</div>
-    </div>`;
- 
-  // tabs content
-  renderAboutTab(s);
-  renderServicesTab(s);
-  renderReviewsTab(s);
-  renderPhotosTab(s);
- 
-  // call bar
-  document.getElementById("call-bar").innerHTML=`
-    <button class="call-bar-btn primary" onclick="callService('${s.phone}')">📞 Call Now</button>
-    <button class="call-bar-btn secondary" onclick="whatsapp('${s.whatsapp}')">💬 WhatsApp</button>`;
-}
-function renderAboutTab(s){
-  document.getElementById("tab-about").innerHTML=`
-    <p class="about-text">${s.description}</p>
-    <div class="info-list">
-      <div class="info-row"><span class="info-icon">📍</span><span class="info-val">${s.address}</span></div>
-      <div class="info-row"><span class="info-icon">📞</span><span class="info-val">${s.phone}</span></div>
-      <div class="info-row"><span class="info-icon">🕐</span><span class="info-val">${s.hours}</span></div>
-      <div class="info-row"><span class="info-icon">💰</span><span class="info-val">${s.priceRange}</span></div>
-      ${s.verified?`<div class="info-row"><span class="info-icon">✅</span><span class="info-val" style="color:#0ca678;font-weight:600">Verified Provider</span></div>`:""}
-    </div>`;
-}
-function renderServicesTab(s){
-  document.getElementById("tab-services").innerHTML=`
-    <div class="services-list">
-      ${s.services.map(sv=>`
-        <div class="svc-item">
-          <span class="svc-item-name">${sv.name}</span>
-          <span class="svc-item-price">${sv.price}</span>
-        </div>`).join("")}
-    </div>`;
-}
-function renderReviewsTab(s){
-  const counts=[0,0,0,0,0];
-  s.reviews.forEach(r=>counts[r.rating-1]++);
-  const bars=[5,4,3,2,1].map(star=>{
-    const pct=s.reviewCount?Math.round(counts[star-1]/s.reviewCount*100):0;
-    return `<div class="rbar-row">
-      <span class="rbar-label">${star}</span>
-      <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%"></div></div>
-      <span class="rbar-count">${counts[star-1]}</span>
-    </div>`;
-  }).join("");
- 
-  document.getElementById("tab-reviews").innerHTML=`
-    <div class="review-summary">
-      <div>
-        <div class="review-score">${s.rating.toFixed(1)}</div>
-        <div style="display:flex;gap:2px;margin-top:4px">${starsHtml(s.rating)}</div>
-        <div style="font-size:11px;color:#475569;margin-top:2px">${s.reviewCount} reviews</div>
-      </div>
-      <div class="review-bars">${bars}</div>
-    </div>
-    ${s.reviews.map(rv=>`
-      <div class="review-card">
-        <div class="rv-header">
-          <div class="rv-avatar">${rv.avatar}</div>
-          <div>
-            <div class="rv-name">${rv.user}</div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="display:flex;gap:1px">${starsHtml(rv.rating)}</div>
-              <span class="rv-date">${rv.date}</span>
-            </div>
+
+      <!-- REGISTER FORM -->
+      <div id="form-register" style="display:none;">
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Register As</div>
+          <div class="role-sel">
+            <div class="role-opt active" id="role-user" onclick="selectRole('user')"><span class="r-icon">👤</span><span class="r-lbl">User</span></div>
+            <div class="role-opt" id="role-provider" onclick="selectRole('provider')"><span class="r-icon">🏪</span><span class="r-lbl">Provider</span></div>
+            <div class="role-opt" id="role-admin" onclick="selectRole('admin')"><span class="r-icon">🛡️</span><span class="r-lbl">Admin</span></div>
           </div>
         </div>
-        <div class="rv-text">${rv.text}</div>
-      </div>`).join("")}
-    <button class="add-review-btn" onclick="openReviewModal()">+ Write a Review</button>`;
-}
-function renderPhotosTab(s){
-  document.getElementById("tab-photos").innerHTML=`
-    <div class="photos-grid">
-      ${s.photos.map(p=>`<img class="photo-img" src="${p}" alt="photo" loading="lazy"/>`).join("")}
-    </div>`;
-}
-function switchTab(idx){
-  activeTab=idx;
-  const tabs=document.querySelectorAll(".tab");
-  const panels=document.querySelectorAll(".tab-panel");
-  tabs.forEach((t,i)=>{t.classList.toggle("active",i===idx)});
-  panels.forEach((p,i)=>{p.classList.toggle("active",i===idx)});
-}
-function toggleFav(){
-  if(!currentSvc) return;
-  const saved=API.toggleSaved(currentSvc.id);
-  document.getElementById("fav-btn").textContent=saved?"❤️":"🤍";
-}
- 
-// ════════════════════════════════════════════════
-//  PROFILE
-// ════════════════════════════════════════════════
-function renderProfile(){
-  const u=API.getProfile();
-  document.getElementById("p-avatar").src=u.avatar;
-  document.getElementById("p-name").textContent=u.name;
-  document.getElementById("p-email").textContent=u.email;
-  document.getElementById("p-loc").textContent=`📍 ${u.location.city}, ${u.location.state}`;
-  document.getElementById("p-phone").textContent=u.phone;
-  document.getElementById("p-email2").textContent=u.email;
-  document.getElementById("p-loc2").textContent=`${u.location.city}, ${u.location.state}`;
-  document.getElementById("st-bookings").textContent=DB.bookings.length;
-  document.getElementById("st-saved").textContent=DB.user.savedServices.length;
-  document.getElementById("st-reviews").textContent=3;
-  document.getElementById("booking-badge").textContent=DB.bookings.filter(b=>b.status==="upcoming").length;
-}
- 
-// ════════════════════════════════════════════════
-//  DRAWER / MENU
-// ════════════════════════════════════════════════
-function openDrawer(){
-  const u=API.getProfile();
-  document.getElementById("d-avatar").src=u.avatar;
-  document.getElementById("d-name").textContent=u.name;
-  document.getElementById("d-email").textContent=u.email;
-  const items=document.getElementById("drawer-items");
-  items.innerHTML=API.getMenuItems().map((m,i)=>{
-    const div=i===3?'<div class="drawer-divider"></div>':""
-    return `${div}<button class="drawer-item" onclick="drawerAction('${m.action}')">
-      <span class="di-icon">${m.icon}</span>
-      <span class="di-label">${m.label}</span>
-    </button>`;
-  }).join("");
-  document.getElementById("drawer").classList.add("open");
-  document.getElementById("drawer-overlay").classList.add("open");
-}
-function closeDrawer(){
-  document.getElementById("drawer").classList.remove("open");
-  document.getElementById("drawer-overlay").classList.remove("open");
-}
-function drawerAction(fn){
-  closeDrawer();
-  if(fn && window[fn]) setTimeout(window[fn],200);
-}
- 
-// ════════════════════════════════════════════════
-//  BOOKINGS
-// ════════════════════════════════════════════════
-function renderBookings(){
-  const list=API.getBookings();
-  const el=document.getElementById("bookings-body");
-  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#94a3b8">No bookings yet</div>`;return;}
-  el.innerHTML=list.map(b=>{
-    const s=b.service;
-    const statusColor=b.status==="completed"?"#0ca678":"#3b5bdb";
-    const statusBg=b.status==="completed"?"#e6fcf5":"#e8f0fe";
-    return `<div class="svc-card" style="margin:12px 20px 0" onclick="${b.service?`openDetail('${b.serviceId}')`:''}">
-      <div class="svc-icon" style="background:${s?.iconBg||'#f1f5f9'}">${s?.icon||'📦'}</div>
-      <div class="svc-info">
-        <div class="svc-name">${s?.name||'Unknown Service'}</div>
-        <div style="font-size:12px;color:#64748b;margin:2px 0">${b.issue}</div>
-        <div style="font-size:12px;color:#94a3b8">📅 ${b.scheduledAt} · ₹${b.amount}</div>
+        <div class="fg"><label>Full Name *</label><input type="text" id="regName" placeholder="Your name"></div>
+        <div class="fg"><label>Email *</label><input type="email" id="regEmail" placeholder="you@email.com"></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="regPhone" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="fg"><label>City</label>
+          <select id="regCity">
+            <option>Jamshedpur</option><option>Ranchi</option><option>Dhanbad</option>
+            <option>Bokaro</option><option>Hazaribagh</option><option>Deoghar</option>
+            <option>Giridih</option><option>Dumka</option><option>Phusro</option>
+          </select>
+        </div>
+
+        <!-- PROVIDER EXTRA FIELDS -->
+        <div id="providerFields" style="display:none;">
+          <div style="height:1px;background:var(--border);margin:9px 0;"></div>
+          <div style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:8px;">Business Details</div>
+          <div class="fg"><label>Business Name *</label><input type="text" id="regBizName" placeholder="Your business name"></div>
+          <div class="fg"><label>Category</label>
+            <select id="regBizCat">
+              <option value="food">🍔 Food</option><option value="electric">⚡ Electrician</option>
+              <option value="transport">🚗 Transport</option><option value="plumber">🔧 Plumber</option>
+              <option value="salon">💇 Salon</option><option value="medical">🏥 Medical</option>
+              <option value="tutor">📚 Tutor</option><option value="catering">🍽️ Catering</option>
+              <option value="cleaning">🧹 Cleaning</option><option value="laundry">👕 Laundry</option>
+              <option value="security">🛡️ Security</option>
+            </select>
+          </div>
+          <div class="fg"><label>Business Address *</label><input type="text" id="regBizAddr" placeholder="Full address"></div>
+          <div class="fg"><label>Description</label><textarea id="regBizDesc" placeholder="Describe your services..."></textarea></div>
+          <div class="fg"><label>Price Range</label><input type="text" id="regBizPrice" placeholder="₹200–₹2000"></div>
+          <div style="background:var(--amber-light);border-radius:8px;padding:8px;font-size:11px;color:#92400e;margin-bottom:9px;">⏳ Listing will be reviewed by admin before going live.</div>
+        </div>
+
+        <!-- ADMIN EXTRA FIELDS -->
+        <div id="adminFields" style="display:none;">
+          <div style="height:1px;background:var(--border);margin:9px 0;"></div>
+          <div class="fg"><label>Admin Secret Key *</label><input type="password" id="regAdminKey" placeholder="Enter secret key"></div>
+          <div style="background:var(--red-light);border-radius:8px;padding:8px;font-size:11px;color:var(--red);margin-bottom:9px;">🔐 Demo key: <strong>ADMIN2024</strong></div>
+        </div>
+
+        <div class="fg"><label>Password *</label><input type="password" id="regPass" placeholder="Create password (min 4 chars)"></div>
+        <button class="primary-btn" onclick="doRegister()">Create Account →</button>
+        <div class="switch-auth">Already registered? <span onclick="switchAuthTab('login')">Login</span></div>
       </div>
-      <span style="background:${statusBg};color:${statusColor};font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap">${b.status==="completed"?"✓ Done":"Upcoming"}</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAP ═══ -->
+<div class="screen" id="screen-map">
+  <div class="topnav">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="brand" style="font-size:15px;">Nearby Map</div>
+    <button class="icon-btn" onclick="openPanel('menuPanel')">☰</button>
+  </div>
+  <div class="map-full">
+    <iframe id="mapIframe"
+      src="https://maps.google.com/maps?q=Jamshedpur,Jharkhand,India&t=m&z=13&ie=UTF8&iwloc=&output=embed"
+      allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="map-search-bar">
+      <span>🔍</span>
+      <input type="text" id="mapSearchInput" placeholder="Search anywhere in Jharkhand..." onkeydown="if(event.key==='Enter')searchOnMap()">
+      <span style="cursor:pointer;font-size:15px;" onclick="searchOnMap()">🎯</span>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo(this,'screen-home')"><div class="nvi">🏠</div><div class="nvl">Home</div><div class="nav-dot"></div></div>
+    <div class="nav-item active" onclick="navTo(this,'screen-map')"><div class="nvi">🗺️</div><div class="nvl">Map</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-services')"><div class="nvi">🛎️</div><div class="nvl">Services</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-profile')"><div class="nvi">👤</div><div class="nvl">Profile</div><div class="nav-dot"></div></div>
+  </div>
+</div>
+
+<!-- ═══ ALL SERVICES ═══ -->
+<div class="screen" id="screen-services">
+  <div class="page-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <h2>All Services</h2>
+  </div>
+  <div class="scroll-body">
+    <div class="search-wrap"><div class="dot"></div><input type="text" id="svcSearch" placeholder="Search services..." oninput="renderAll()"><span>🔍</span></div>
+    <div class="filter-bar" id="svcCatFilter"></div>
+    <div class="filter-bar" id="svcLocFilter"></div>
+    <div id="allList"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo(this,'screen-home')"><div class="nvi">🏠</div><div class="nvl">Home</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-map')"><div class="nvi">🗺️</div><div class="nvl">Map</div><div class="nav-dot"></div></div>
+    <div class="nav-item active" onclick="navTo(this,'screen-services')"><div class="nvi">🛎️</div><div class="nvl">Services</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-profile')"><div class="nvi">👤</div><div class="nvl">Profile</div><div class="nav-dot"></div></div>
+  </div>
+</div>
+
+<!-- ═══ DETAIL ═══ -->
+<div class="screen" id="screen-detail">
+  <div class="detail-hero">
+    <button class="back-btn" onclick="goBack()" style="margin-bottom:8px;">←</button>
+    <h2 id="dName"></h2>
+    <div class="ver-badge" id="dVer">✅ Verified</div>
+  </div>
+  <div class="detail-body">
+    <div class="photo-card">
+      <div class="photo-grid">
+        <div class="photo-slot photo-main" id="dPhoto" style="font-size:46px;"></div>
+        <div class="photo-slot" style="font-size:22px;">🏠</div>
+        <div class="photo-slot" style="font-size:22px;">⭐</div>
+      </div>
+    </div>
+    <div class="detail-acts">
+      <button style="background:var(--primary-light);color:var(--primary);" onclick="openCallDetail()">📞 Call</button>
+      <button style="background:var(--primary);color:#fff;" onclick="openBookDetail()">📅 Book Now</button>
+    </div>
+    <div class="info-card">
+      <div class="info-row"><div class="info-icon">📞</div><div class="info-text"><div class="lbl">PHONE</div><div class="val" id="dPhone"></div></div><button class="info-action" onclick="openCallDetail()">Call</button></div>
+      <div class="info-row"><div class="info-icon">📧</div><div class="info-text"><div class="lbl">EMAIL</div><div class="val" id="dEmail"></div></div><button class="info-action" onclick="copyEmail()">Copy</button></div>
+      <div class="info-row"><div class="info-icon">📍</div><div class="info-text"><div class="lbl">ADDRESS</div><div class="val" id="dAddr"></div></div><button class="info-action" onclick="searchAddr()">Map</button></div>
+      <div class="info-row"><div class="info-icon">⏰</div><div class="info-text"><div class="lbl">HOURS</div><div class="val" id="dHours"></div></div></div>
+      <div class="info-row"><div class="info-icon">💰</div><div class="info-text"><div class="lbl">PRICE</div><div class="val" id="dPrice"></div></div></div>
+    </div>
+    <div class="info-card" style="padding:12px;">
+      <div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:5px;">About</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55;" id="dAbout"></div>
+    </div>
+    <div class="rating-widget">
+      <h3>Customer Reviews</h3>
+      <div class="avg-row">
+        <div><div class="avg-num" id="avgRating">—</div><div style="font-size:10px;color:var(--muted);" id="totalReviews">0 reviews</div></div>
+        <div class="avg-bars" id="avgBars"></div>
+      </div>
+      <div id="dReviews"></div>
+      <button class="primary-btn" style="margin-top:10px;" onclick="openRatingModal()">✍️ Write a Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div class="screen" id="screen-profile">
+  <div class="profile-hero">
+    <div class="profile-av" id="profAv">👤</div>
+    <div class="profile-name" id="profName">Guest</div>
+    <div class="profile-email" id="profEmail">Not logged in</div>
+    <div class="role-badge-pill" id="profRole">👤 Guest</div>
+  </div>
+  <div class="profile-body">
+    <div id="guestPrompt" class="profile-card">
+      <div class="profile-row" onclick="goScreen('screen-auth')"><div class="p-icon" style="background:#eef0fd;">🔑</div><div class="p-label" style="color:var(--primary);">Login / Register</div><div class="p-arr">›</div></div>
+    </div>
+    <div id="loggedProfile" style="display:none;flex-direction:column;">
+      <div class="profile-card">
+        <div class="profile-row" onclick="openSP('sp-bookings')"><div class="p-icon" style="background:#eef0fd;">📅</div><div class="p-label">My Bookings</div><span class="p-badge" id="bkBadge">0</span><div class="p-arr">›</div></div>
+        <div class="profile-row" onclick="openSP('sp-saved')"><div class="p-icon" style="background:#fef9c3;">⭐</div><div class="p-label">Saved Services</div><div class="p-arr">›</div></div>
+        <div class="profile-row" onclick="openSP('sp-myreviews')"><div class="p-icon" style="background:#dcfce7;">💬</div><div class="p-label">My Reviews</div><div class="p-arr">›</div></div>
+        <div class="profile-row" onclick="openSP('sp-offers')"><div class="p-icon" style="background:#fff7ed;">🎁</div><div class="p-label">Offers &amp; Deals</div><span class="p-badge">5</span><div class="p-arr">›</div></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-row" onclick="openSP('sp-editprofile')"><div class="p-icon" style="background:#ede9fe;">✏️</div><div class="p-label">Edit Profile</div><div class="p-arr">›</div></div>
+        <div class="profile-row" onclick="openSP('sp-settings')"><div class="p-icon" style="background:#f3f4f6;">⚙️</div><div class="p-label">Settings</div><div class="p-arr">›</div></div>
+        <div class="profile-row" onclick="openSP('sp-help')"><div class="p-icon" style="background:#ede9fe;">❓</div><div class="p-label">Help &amp; Support</div><div class="p-arr">›</div></div>
+      </div>
+      <div id="providerLink" class="profile-card" style="display:none;">
+        <div class="profile-row" onclick="goScreen('screen-provider')"><div class="p-icon" style="background:#dcfce7;">🏪</div><div class="p-label" style="color:var(--green)">Provider Dashboard</div><div class="p-arr" style="color:var(--green)">›</div></div>
+      </div>
+      <div id="adminLink" class="profile-card" style="display:none;">
+        <div class="profile-row" onclick="goScreen('screen-admin')"><div class="p-icon" style="background:#fee2e2;">🛡️</div><div class="p-label" style="color:var(--red)">Admin Panel</div><div class="p-arr" style="color:var(--red)">›</div></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-row" onclick="doLogout()"><div class="p-icon" style="background:#fee2e2;">🚪</div><div class="p-label" style="color:var(--red)">Log Out</div><div class="p-arr" style="color:var(--red)">›</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo(this,'screen-home')"><div class="nvi">🏠</div><div class="nvl">Home</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-map')"><div class="nvi">🗺️</div><div class="nvl">Map</div><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="navTo(this,'screen-services')"><div class="nvi">🛎️</div><div class="nvl">Services</div><div class="nav-dot"></div></div>
+    <div class="nav-item active" onclick="navTo(this,'screen-profile')"><div class="nvi">👤</div><div class="nvl">Profile</div><div class="nav-dot"></div></div>
+  </div>
+</div>
+
+<!-- ═══ PROVIDER DASHBOARD ═══ -->
+<div class="screen" id="screen-provider">
+  <div class="topnav">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="brand" style="font-size:14px;">Provider Dashboard</div>
+    <button class="icon-btn" onclick="openSP('sp-addservice')">➕</button>
+  </div>
+  <div class="scroll-body">
+    <div id="provStatusBanner" style="border-radius:var(--rs);padding:10px;margin-bottom:9px;font-size:12px;font-weight:700;text-align:center;"></div>
+    <div class="stat-grid" id="provStats"></div>
+    <div class="sec-hdr"><span class="sec-label">My Listings</span><button class="see-all" onclick="openSP('sp-addservice')">+ Add New</button></div>
+    <div id="provListings"></div>
+    <div class="sec-hdr" style="margin-top:11px;"><span class="sec-label">Incoming Bookings</span></div>
+    <div id="provBookings"></div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div class="screen" id="screen-admin">
+  <div class="topnav">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="brand" style="font-size:14px;">🛡️ Admin Panel</div>
+  </div>
+  <div class="scroll-body">
+    <div class="stat-grid" id="adminStats"></div>
+    <div class="sec-hdr"><span class="sec-label" style="color:var(--red);">⏳ Pending Approvals</span></div>
+    <div id="pendingList"></div>
+    <div class="sec-hdr" style="margin-top:11px;"><span class="sec-label">👥 Manage Users</span></div>
+    <div id="adminUsers"></div>
+    <div class="sec-hdr" style="margin-top:11px;"><span class="sec-label">🏪 Manage Providers</span></div>
+    <div id="adminProviders"></div>
+    <div class="sec-hdr" style="margin-top:11px;"><span class="sec-label">🛎️ All Services</span></div>
+    <div id="adminServices"></div>
+  </div>
+</div>
+
+<!-- ═══ SUBPAGES ═══ -->
+
+<!-- MY BOOKINGS -->
+<div class="subpage" id="sp-bookings">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-bookings')">←</button><h2>My Bookings</h2></div>
+  <div class="scroll-body no-nav" id="myBookingsList"></div>
+</div>
+
+<!-- SAVED -->
+<div class="subpage" id="sp-saved">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-saved')">←</button><h2>Saved Services</h2></div>
+  <div class="scroll-body no-nav" id="savedList"></div>
+</div>
+
+<!-- MY REVIEWS -->
+<div class="subpage" id="sp-myreviews">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-myreviews')">←</button><h2>My Reviews</h2></div>
+  <div class="scroll-body no-nav" id="myReviewsList"></div>
+</div>
+
+<!-- OFFERS -->
+<div class="subpage" id="sp-offers">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-offers')">←</button><h2>Offers &amp; Deals</h2></div>
+  <div class="scroll-body no-nav" id="offersList"></div>
+</div>
+
+<!-- EDIT PROFILE -->
+<div class="subpage" id="sp-editprofile">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-editprofile')">←</button><h2>Edit Profile</h2></div>
+  <div class="scroll-body no-nav">
+    <div style="text-align:center;padding:14px 0 9px;">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--primary-light);border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 7px;">👤</div>
+      <button style="border:none;background:var(--primary-light);color:var(--primary);padding:5px 12px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;" onclick="toast('📷 Camera opened!')">Change Photo</button>
+    </div>
+    <div class="info-card" style="padding:12px;">
+      <div class="fg"><label>Full Name</label><input type="text" id="epName"></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="epPhone"></div>
+      <div class="fg"><label>Email</label><input type="email" id="epEmail"></div>
+      <div class="fg"><label>City</label><select id="epCity"><option>Jamshedpur</option><option>Ranchi</option><option>Dhanbad</option><option>Bokaro</option><option>Hazaribagh</option></select></div>
+      <button class="primary-btn" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SERVICE -->
+<div class="subpage" id="sp-addservice">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-addservice')">←</button><h2 id="addSvcTitle">Add Listing</h2></div>
+  <div class="scroll-body no-nav">
+    <div class="info-card" style="padding:12px;">
+      <div class="fg"><label>Business Name *</label><input type="text" id="asBizName"></div>
+      <div class="fg"><label>Category</label>
+        <select id="asBizCat">
+          <option value="food">🍔 Food</option><option value="electric">⚡ Electrician</option>
+          <option value="transport">🚗 Transport</option><option value="plumber">🔧 Plumber</option>
+          <option value="salon">💇 Salon</option><option value="medical">🏥 Medical</option>
+          <option value="tutor">📚 Tutor</option><option value="catering">🍽️ Catering</option>
+          <option value="cleaning">🧹 Cleaning</option><option value="laundry">👕 Laundry</option>
+          <option value="security">🛡️ Security</option>
+        </select>
+      </div>
+      <div class="fg"><label>City</label>
+        <select id="asBizCity">
+          <option>Jamshedpur</option><option>Ranchi</option><option>Dhanbad</option>
+          <option>Bokaro</option><option>Hazaribagh</option><option>Deoghar</option>
+          <option>Giridih</option><option>Dumka</option><option>Phusro</option>
+        </select>
+      </div>
+      <div class="fg"><label>Full Address *</label><input type="text" id="asBizAddr" placeholder="Street, area, city"></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="asBizPhone"></div>
+      <div class="fg"><label>Email</label><input type="email" id="asBizEmail"></div>
+      <div class="fg"><label>Business Hours</label><input type="text" id="asBizHours" placeholder="9 AM – 9 PM"></div>
+      <div class="fg"><label>Price Range</label><input type="text" id="asBizPrice" placeholder="₹200–₹2000"></div>
+      <div class="fg"><label>Description</label><textarea id="asBizDesc" placeholder="Describe your services..."></textarea></div>
+      <button class="primary-btn" onclick="saveProviderService()">Submit for Approval</button>
+    </div>
+  </div>
+  </div>
+
+<!-- SETTINGS -->
+<div class="subpage" id="sp-settings">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-settings')">←</button><h2>Settings</h2></div>
+  <div class="scroll-body no-nav">
+    <div class="info-card">
+      <div class="set-row"><div class="s-ico" style="background:#1a1d2e;">🌙</div><div class="s-lbl">Dark Mode</div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      <div class="set-row"><div class="s-ico" style="background:#eef0fd;">📍</div><div class="s-lbl">Location Access</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="set-row"><div class="s-ico" style="background:#dcfce7;">🔒</div><div class="s-lbl">Two-Factor Auth</div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      <div class="set-row" onclick="toast('🗑️ Cache cleared!')"><div class="s-ico" style="background:#fff7ed;">💾</div><div class="s-lbl">Cache &amp; Data</div><div class="s-val">48 MB</div><button class="info-action">Clear</button></div>
+      <div class="set-row" onclick="confirmDelete('account','deleteMyAccount')"><div class="s-ico" style="background:#fee2e2;">⚠️</div><div class="s-lbl" style="color:var(--red)">Delete Account</div><div class="p-arr" style="color:var(--red)">›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HELP -->
+<div class="subpage" id="sp-help">
+  <div class="page-header"><button class="back-btn" onclick="closeSP('sp-help')">←</button><h2>Help &amp; Support</h2></div>
+  <div class="scroll-body no-nav">
+    <div class="info-card">
+      <div class="profile-row" onclick="toast('💬 Live chat opening...')"><div class="p-icon" style="background:#eef0fd;">💬</div><div class="p-label">Live Chat</div><div class="p-arr">›</div></div>
+      <div class="profile-row" onclick="openCallModal('CityServe Support','+91 1800 123 4567')"><div class="p-icon" style="background:#dcfce7;">📞</div><div class="p-label">Call Support</div><div class="p-arr">›</div></div>
+      <div class="profile-row" onclick="toast('📧 support@cityserve.in')"><div class="p-icon" style="background:#fce7f3;">📧</div><div class="p-label">Email Us</div><div class="p-arr">›</div></div>
+      <div class="profile-row" onclick="toast('📄 Opening FAQ...')"><div class="p-icon" style="background:#fff7ed;">❓</div><div class="p-label">FAQ</div><div class="p-arr">›</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<script>
+// ════════════════ DATABASE ════════════════
+const DB = {
+  _get(k){ try{ return JSON.parse(localStorage.getItem('cs2_'+k)); }catch{ return null; } },
+  _set(k,v){ localStorage.setItem('cs2_'+k, JSON.stringify(v)); },
+  getUsers(){ return this._get('users') || []; },
+  getServices(){
+    const s = this._get('services');
+    if(!s){ this._set('services', SVC_SEED.map(x=>({...x}))); return SVC_SEED.map(x=>({...x})); }
+    return s;
+  },
+  getBookings(){ return this._get('bookings') || []; },
+  getReviews(){ return this._get('reviews') || {}; },
+  getNotifs(){ return this._get('notifs') || [...NOTIF_SEED]; },
+  getCurrentUser(){ return this._get('cu'); },
+  saveUsers(u){ this._set('users',u); },
+  saveServices(s){ this._set('services',s); },
+  saveBookings(b){ this._set('bookings',b); },
+  saveReviews(r){ this._set('reviews',r); },
+  saveNotifs(n){ this._set('notifs',n); },
+  setCU(u){ this._set('cu',u); },
+  clearCU(){ localStorage.removeItem('cs2_cu'); },
+};
+
+// ════════════════ CONSTANTS ════════════════
+const ADMIN_SECRET = 'ADMIN2024';
+const CAT_ICONS = {food:'🍕',electric:'⚡',transport:'🚗',plumber:'🔧',salon:'💇',medical:'🏥',tutor:'📚',catering:'🍽️',cleaning:'🧹',laundry:'👕',security:'🛡️'};
+const CAT_BG    = {food:'#fff4e6',electric:'#fffbeb',transport:'#eff6ff',plumber:'#f0fdf4',salon:'#fdf4ff',medical:'#f0fdf4',tutor:'#f0f9ff',catering:'#fff7ed',cleaning:'#ecfdf5',laundry:'#eff6ff',security:'#f8fafc'};
+const CATS = [
+  {id:'all',label:'✨ All'},{id:'food',label:'🍔 Food'},{id:'electric',label:'⚡ Electric'},
+  {id:'transport',label:'🚗 Transport'},{id:'plumber',label:'🔧 Plumber'},{id:'salon',label:'💇 Salon'},
+  {id:'medical',label:'🏥 Medical'},{id:'tutor',label:'📚 Tutor'},{id:'catering',label:'🍽️ Catering'},
+  {id:'cleaning',label:'🧹 Cleaning'},{id:'laundry',label:'👕 Laundry'},{id:'security',label:'🛡️ Security'},
+];
+const CITIES = ['All Cities','Jamshedpur','Ranchi','Dhanbad','Bokaro','Hazaribagh','Deoghar','Giridih','Dumka','Phusro'];
+
+const SVC_SEED = [
+  {id:1,name:'Raj Pizza Hub',cat:'food',city:'Jamshedpur',ver:true,rat:4.5,dist:'1.1km',desc:'Fresh pizzas & Italian',ph:'+91 98765 43210',em:'contact@rajpizza.com',addr:'MG Road, Jamshedpur, Jharkhand',hrs:'9 AM–11 PM',price:'₹150–₹500',about:'Serving fresh handmade pizzas since 2018.',status:'approved',ownerId:null},
+  {id:2,name:'Burger Bhai',cat:'food',city:'Ranchi',ver:false,rat:4.2,dist:'0.9km',desc:'Juicy burgers & snacks',ph:'+91 91234 56789',em:'burgerbhai@food.com',addr:'Station Road, Ranchi, Jharkhand',hrs:'10 AM–10 PM',price:'₹80–₹300',about:'Best burgers at pocket-friendly prices.',status:'approved',ownerId:null},
+  {id:3,name:'SparkFix Electric',cat:'electric',city:'Bokaro',ver:true,rat:4.3,dist:'0.8km',desc:'Wiring & appliance repairs',ph:'+91 90000 11223',em:'sparkfix@elec.com',addr:'Industrial Area, Bokaro, Jharkhand',hrs:'8 AM–8 PM',price:'₹200–₹2000',about:'Licensed electricians with 10+ years.',status:'approved',ownerId:null},
+  {id:4,name:'QuickRide Taxi',cat:'transport',city:'Dhanbad',ver:true,rat:4.6,dist:'1.4km',desc:'Cabs & outstation rides',ph:'+91 98001 55667',em:'quickride@taxi.com',addr:'City Cab Stand, Dhanbad, Jharkhand',hrs:'24/7',price:'₹10/km',about:'Reliable taxi service for city rides.',status:'approved',ownerId:null},
+  {id:5,name:'FixIt Plumbers',cat:'plumber',city:'Hazaribagh',ver:true,rat:4.4,dist:'1.7km',desc:'Pipes, leaks & fittings',ph:'+91 97776 88900',em:'fixit@plumb.com',addr:'Near Bus Stand, Hazaribagh, Jharkhand',hrs:'7 AM–9 PM',price:'₹300–₹1500',about:'Expert plumbers for all needs.',status:'approved',ownerId:null},
+  {id:6,name:'Style Studio',cat:'salon',city:'Jamshedpur',ver:false,rat:4.7,dist:'2.1km',desc:'Hair, skin & beauty care',ph:'+91 96655 44332',em:'stylestudio@salon.com',addr:'Fashion Street, Jamshedpur, Jharkhand',hrs:'9 AM–9 PM',price:'₹100–₹2500',about:'Premium unisex salon.',status:'approved',ownerId:null},
+  {id:7,name:'CityMed Clinic',cat:'medical',city:'Ranchi',ver:true,rat:4.8,dist:'1.2km',desc:'General physician & lab tests',ph:'+91 99887 66554',em:'citymed@clinic.com',addr:'Health Square, Ranchi, Jharkhand',hrs:'8 AM–8 PM',price:'₹200–₹1000',about:'MBBS certified physician with 15+ years.',status:'approved',ownerId:null},
+  {id:8,name:'BrightPath Tutors',cat:'tutor',city:'Deoghar',ver:true,rat:4.5,dist:'0.6km',desc:'Math, Science & English coaching',ph:'+91 91111 22333',em:'brightpath@edu.com',addr:'Learning Lane, Deoghar, Jharkhand',hrs:'6 AM–10 PM',price:'₹300/hr',about:'Expert tutors for classes 6–12.',status:'approved',ownerId:null},
+  {id:9,name:'CleanPro Services',cat:'cleaning',city:'Giridih',ver:true,rat:4.3,dist:'1.8km',desc:'Home & office deep cleaning',ph:'+91 77889 00112',em:'cleanpro@clean.com',addr:'Housekeeping Lane, Giridih, Jharkhand',hrs:'7 AM–7 PM',price:'₹499–₹2999',about:'Professional home and office cleaning.',status:'approved',ownerId:null},
+  {id:10,name:'SafeGuard Security',cat:'security',city:'Bokaro',ver:true,rat:4.4,dist:'3.2km',desc:'Guards, CCTV & alarm systems',ph:'+91 98776 55443',em:'safeguard@sec.com',addr:'Sentinel Tower, Bokaro, Jharkhand',hrs:'24/7',price:'₹8000/month',about:'Licensed security for homes and offices.',status:'approved',ownerId:null},
+];
+
+const NOTIF_SEED = [
+  {icon:'🏙️',bg:'#f3f4f6',t:'Welcome to CityServe!',s:'Discover local services in Jharkhand.',time:'Just now',unread:true},
+  {icon:'🎁',bg:'#fff7ed',t:'New Offer!',s:'20% OFF on first booking. Use FIRST20.',time:'1 hr ago',unread:true},
+];
+
+const OFFERS = [
+  {e:'🍕',t:'20% OFF first food booking',s:'Valid till April 30',c:'FIRST20'},
+  {e:'⚡',t:'Free inspection – Electrician',s:'Limited time offer',c:'FREECHECK'},
+  {e:'🚗',t:'₹50 cashback on transport',s:'Min ₹200 ride',c:'RIDE50'},
+  {e:'💇',t:'₹100 OFF salon services',s:'Weekdays only',c:'SALON100'},
+  {e:'🏥',t:'Free consultation – CityMed',s:'New users only',c:'MEDCARE'},
+];
+
+// ════════════════ STATE ════════════════
+let screenHist = ['screen-home'];
+let homeCat='all', homeLoc='All Cities';
+let svcCat='all',  svcLoc='All Cities';
+let curSvc=null, selectedRating=0, editingSvcId=null;
+
+// ════════════════ INIT ════════════════
+function init(){
+  buildFilters('homeCatFilter','homeLocFilter','home');
+  buildFilters('svcCatFilter','svcLocFilter','svc');
+  renderHome();
+  updateProfileUI();
+  refreshBadge();
+}
+
+// ════════════════ FILTERS ════════════════
+function buildFilters(catId, locId, mode){
+  const catEl = document.getElementById(catId); catEl.innerHTML='';
+  CATS.forEach(c=>{
+    const b = document.createElement('button');
+    const active = (mode==='home'?homeCat:svcCat)===c.id;
+    b.className='f-btn'+(active?' active':'');
+    b.textContent=c.label;
+    b.onclick=()=>{
+      if(mode==='home') homeCat=c.id; else svcCat=c.id;
+      buildFilters(catId,locId,mode);
+      mode==='home'?renderHome():renderAll();
+    };
+    catEl.appendChild(b);
+  });
+  const locEl = document.getElementById(locId); locEl.innerHTML='';
+  CITIES.forEach(city=>{
+    const b = document.createElement('button');
+    const active = (mode==='home'?homeLoc:svcLoc)===city;
+    b.className='f-btn'+(active?' loc-active':'');
+    b.textContent='📍 '+city;
+    b.onclick=()=>{
+      if(mode==='home') homeLoc=city; else svcLoc=city;
+      buildFilters(catId,locId,mode);
+      mode==='home'?renderHome():renderAll();
+    };
+    locEl.appendChild(b);
+  });
+}
+
+// ════════════════ SERVICE CARDS ════════════════
+function mkCard(s){
+  const icon=CAT_ICONS[s.cat]||'🛎️', bg=CAT_BG[s.cat]||'#f3f4f6', rat=s.rat||0;
+  let badge='';
+  if(s.status==='approved'&&s.ver) badge='<span style="font-size:10px;color:var(--green);font-weight:600;">✅ Verified</span>';
+  else if(s.status==='pending') badge='<span style="font-size:10px;color:var(--amber);font-weight:600;">⏳ Pending</span>';
+  else if(s.status==='rejected') badge='<span style="font-size:10px;color:var(--red);font-weight:600;">❌ Rejected</span>';
+  const d=document.createElement('div'); d.className='service-card';
+  d.innerHTML=`
+    <div class="svc-icon" style="background:${bg}">${icon}</div>
+    <div style="flex:1;min-width:0;cursor:pointer;" onclick="openDetail(${s.id})">
+      <div class="svc-name">${s.name}</div>
+      ${badge}
+      <div class="svc-meta">
+        <span class="stars">${'★'.repeat(Math.floor(rat))}${'☆'.repeat(5-Math.floor(rat))}</span>
+        ${rat>0?rat.toFixed(1)+' · ':''}<span style="color:#059669">📍${s.city||''}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">${s.desc||''}</div>
+    </div>
+    <div class="svc-actions">
+      <button class="btn-call" onclick="event.stopPropagation();openCallModal('${escQ(s.name)}','${s.ph||''}')">📞</button>
+      <button class="btn-book" onclick="event.stopPropagation();openBookModal('${escQ(s.name)}',${s.id})">Book</button>
     </div>`;
-  }).join("")+'<div style="height:24px"></div>';
+  return d;
 }
- 
-// ════════════════════════════════════════════════
-//  SAVED
-// ════════════════════════════════════════════════
+function escQ(s){ return (s||'').replace(/'/g,"\\'"); }
+
+function filterSvcs(mode){
+  const cat = mode==='home'?homeCat:svcCat;
+  const loc = mode==='home'?homeLoc:svcLoc;
+  const q = (mode==='home'?(document.getElementById('homeSearch').value||''):(document.getElementById('svcSearch').value||'')).toLowerCase();
+  return DB.getServices().filter(s=>{
+    if(s.status!=='approved') return false;
+    if(cat!=='all' && s.cat!==cat) return false;
+    if(loc!=='All Cities' && (s.city||'')!==loc) return false;
+    if(q && !s.name.toLowerCase().includes(q) && !(s.desc||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderHome(){
+  const el=document.getElementById('servicesList'); if(!el)return;
+  el.innerHTML='';
+  const svcs=filterSvcs('home');
+  const cats=[...new Set(svcs.map(s=>s.cat))];
+  cats.forEach(c=>{
+    const f=svcs.filter(s=>s.cat===c);
+    if(!f.length)return;
+    const catObj=CATS.find(x=>x.id===c);
+    const lbl=document.createElement('div'); lbl.className='cat-label';
+    lbl.textContent=(catObj?catObj.label:c).replace(/^[^\s]+\s/,'').toUpperCase();
+    el.appendChild(lbl); f.forEach(s=>el.appendChild(mkCard(s)));
+  });
+  if(!el.children.length) el.innerHTML='<div class="empty-state"><div class="e-icon">🔍</div><p>No services match your filters</p></div>';
+}
+
+function renderAll(){
+  const el=document.getElementById('allList'); if(!el)return;
+  el.innerHTML='';
+  const svcs=filterSvcs('svc');
+  const cats=[...new Set(svcs.map(s=>s.cat))];
+  cats.forEach(c=>{
+    const f=svcs.filter(s=>s.cat===c);
+    if(!f.length)return;
+    const catObj=CATS.find(x=>x.id===c);
+    const lbl=document.createElement('div'); lbl.className='cat-label';
+    lbl.textContent=(catObj?catObj.label:c).replace(/^[^\s]+\s/,'').toUpperCase();
+    el.appendChild(lbl); f.forEach(s=>el.appendChild(mkCard(s)));
+  });
+  if(!el.children.length) el.innerHTML='<div class="empty-state"><div class="e-icon">🔍</div><p>No services match your filters</p></div>';
+}
+
+// ════════════════ NAVIGATION ════════════════
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id); if(!el)return;
+  el.classList.add('active');
+  if(screenHist[screenHist.length-1]!==id) screenHist.push(id);
+  if(id==='screen-services'){ buildFilters('svcCatFilter','svcLocFilter','svc'); renderAll(); }
+  if(id==='screen-admin') renderAdmin();
+  if(id==='screen-provider') renderProvider();
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(n=>{
+    const t=n.getAttribute('onclick')||'';
+    n.classList.toggle('active', t.includes("'"+id+"'"));
+  });
+}
+function goBack(){
+  if(screenHist.length>1) screenHist.pop();
+  const prev=screenHist[screenHist.length-1]||'screen-home';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(prev); if(el) el.classList.add('active');
+}
+function navTo(el,id){
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  goScreen(id);
+}
+
+// ════════════════ SUBPAGES / PANELS / MODALS ════════════════
+function openSP(id){
+  const el=document.getElementById(id); if(!el)return;
+  el.classList.add('open');
+  if(id==='sp-bookings') renderMyBookings();
+  if(id==='sp-saved') renderSaved();
+  if(id==='sp-myreviews') renderMyReviews();
+  if(id==='sp-offers') renderOffers();
+  if(id==='sp-addservice') prepAddService();
+  if(id==='sp-editprofile') prefillEditProfile();
+}
+function closeSP(id){ document.getElementById(id).classList.remove('open'); }
+function openPanel(id){ document.getElementById(id).classList.add('open'); }
+function closePanel(id){ document.getElementById(id).classList.remove('open'); }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ════════════════ AUTH ════════════════
+let selectedRole='user';
+
+function switchAuthTab(tab){
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'block':'none';
+}
+function selectRole(role){
+  selectedRole=role;
+  ['user','provider','admin'].forEach(r=>document.getElementById('role-'+r).classList.toggle('active',r===role));
+  document.getElementById('providerFields').style.display=role==='provider'?'block':'none';
+  document.getElementById('adminFields').style.display=role==='admin'?'block':'none';
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass){ toast('⚠️ Fill in all fields'); return; }
+  const users=DB.getUsers();
+  const u=users.find(x=>x.email===email && x.pass===pass);
+  if(!u){ toast('❌ Invalid credentials'); return; }
+  if(u.suspended){ toast('🚫 Account suspended. Contact support.'); return; }
+  DB.setCU(u);
+  updateProfileUI();
+  goScreen('screen-home');
+  toast('👋 Welcome back, '+u.name+'!');
+  addNotif('👤','#eef0fd','Login successful','You are now signed in.','Just now');
+}
+function doGuestLogin(){
+  DB.clearCU();
+  updateProfileUI();
+  goScreen('screen-home');
+  toast('👤 Browsing as Guest');
+}
+function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const city=document.getElementById('regCity').value;
+  const pass=document.getElementById('regPass').value;
+  if(!name){ toast('⚠️ Name is required'); return; }
+  if(!email||!email.includes('@')){ toast('⚠️ Valid email required'); return; }
+  if(!pass||pass.length<4){ toast('⚠️ Password must be 4+ chars'); return; }
+  const users=DB.getUsers();
+  if(users.find(u=>u.email===email)){ toast('⚠️ Email already registered'); return; }
+  if(selectedRole==='admin'){
+    const key=document.getElementById('regAdminKey').value;
+    if(key!==ADMIN_SECRET){ toast('❌ Wrong admin key'); return; }
+  }
+  const newUser={id:Date.now(),name,email,phone,city,pass,role:selectedRole,createdAt:new Date().toLocaleDateString(),suspended:false};
+  if(selectedRole==='provider'){
+    const bizName=document.getElementById('regBizName').value.trim();
+    const bizAddr=document.getElementById('regBizAddr').value.trim();
+    if(!bizName||!bizAddr){ toast('⚠️ Business name & address required'); return; }
+    const services=DB.getServices();
+    const newSvc={
+      id:Date.now()+1,name:bizName,cat:document.getElementById('regBizCat').value,
+      city,ver:false,rat:0,dist:'?',
+      desc:(document.getElementById('regBizDesc').value||bizName).substring(0,55),
+      ph:phone,em:email,addr:bizAddr,hrs:'9 AM–9 PM',
+      price:document.getElementById('regBizPrice').value||'Contact',
+      about:document.getElementById('regBizDesc').value||'',
+      status:'pending',ownerId:newUser.id
+    };
+    services.push(newSvc);
+    DB.saveServices(services);
+    newUser.businessId=newSvc.id;
+  }
+  users.push(newUser);
+  DB.saveUsers(users);
+  DB.setCU(newUser);
+  updateProfileUI();
+  goScreen('screen-home');
+  toast('🎉 Account created! Welcome, '+name+'!');
+  addNotif('🎉','#dcfce7','Welcome!','Your account has been created.','Just now');
+}
+function doLogout(){
+  DB.clearCU();
+  updateProfileUI();
+  goScreen('screen-home');
+  toast('👋 Logged out successfully');
+}
+
+// ════════════════ PROFILE UI ════════════════
+function updateProfileUI(){
+  const cu=DB.getCurrentUser();
+  const hgn=document.getElementById('homeGreetName');
+  if(hgn) hgn.textContent=cu?cu.name:'Guest';
+  const gp=document.getElementById('guestPrompt');
+  const lp=document.getElementById('loggedProfile');
+  if(!cu){
+    if(gp)gp.style.display=''; if(lp)lp.style.display='none';
+    document.getElementById('profName').textContent='Guest';
+    document.getElementById('profEmail').textContent='Not logged in';
+    document.getElementById('profRole').textContent='👤 Guest';
+    document.getElementById('profAv').textContent='👤';
+    return;
+  }
+  if(gp)gp.style.display='none'; if(lp)lp.style.display='flex';
+  document.getElementById('profName').textContent=cu.name;
+  document.getElementById('profEmail').textContent=cu.email;
+  const roleLabels={user:'👤 User',provider:'🏪 Provider',admin:'🛡️ Admin'};
+  document.getElementById('profRole').textContent=roleLabels[cu.role]||'👤 User';
+  document.getElementById('profAv').textContent=cu.role==='admin'?'🛡️':cu.role==='provider'?'🏪':'👤';
+  const pl=document.getElementById('providerLink'); if(pl) pl.style.display=cu.role==='provider'?'':'none';
+  const al=document.getElementById('adminLink'); if(al) al.style.display=cu.role==='admin'?'':'none';
+  const mp=document.getElementById('menuProvider'); if(mp) mp.style.display=cu.role==='provider'?'flex':'none';
+  const ma=document.getElementById('menuAdmin'); if(ma) ma.style.display=cu.role==='admin'?'flex':'none';
+  // booking count
+  const bks=DB.getBookings().filter(b=>b.userId===cu.id);
+  const bb=document.getElementById('bkBadge'); if(bb) bb.textContent=bks.length;
+}
+
+// ════════════════ DETAIL ════════════════
+function openDetail(id){
+  const svcs=DB.getServices(); curSvc=svcs.find(s=>s.id===id); if(!curSvc)return;
+  document.getElementById('dName').textContent=curSvc.name;
+  document.getElementById('dVer').textContent=curSvc.ver?'✅ Verified':'📋 Listed';
+  document.getElementById('dPhoto').textContent=CAT_ICONS[curSvc.cat]||'🛎️';
+  document.getElementById('dPhone').textContent=curSvc.ph||'N/A';
+  document.getElementById('dEmail').textContent=curSvc.em||'N/A';
+  document.getElementById('dAddr').textContent=curSvc.addr||'N/A';
+  document.getElementById('dHours').textContent=curSvc.hrs||'N/A';
+  document.getElementById('dPrice').textContent=curSvc.price||'N/A';
+  document.getElementById('dAbout').textContent=curSvc.about||'No description available.';
+  renderDetailReviews();
+  goScreen('screen-detail');
+}
+function renderDetailReviews(){
+  if(!curSvc)return;
+  const allRev=DB.getReviews(); const revs=allRev[curSvc.id]||[];
+  const el=document.getElementById('dReviews'); el.innerHTML='';
+  const avg=document.getElementById('avgRating'); const tot=document.getElementById('totalReviews');
+  const bars=document.getElementById('avgBars');
+  if(!revs.length){ avg.textContent='—'; tot.textContent='0 reviews'; bars.innerHTML=''; return; }
+  const mean=(revs.reduce((a,r)=>a+r.rating,0)/revs.length).toFixed(1);
+  avg.textContent=mean; tot.textContent=revs.length+' review'+(revs.length>1?'s':'');
+  const counts=[5,4,3,2,1].map(n=>({n,c:revs.filter(r=>r.rating===n).length}));
+  bars.innerHTML=counts.map(x=>`<div class="bar-row"><span class="bar-lbl">${x.n}</span><div class="bar-bg"><div class="bar-fill" style="width:${revs.length?Math.round(x.c/revs.length*100):0}%"></div></div></div>`).join('');
+  const colors=['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e'];
+  revs.slice().reverse().forEach(r=>{
+    const d=document.createElement('div'); d.className='review-item';
+    d.innerHTML=`<div class="review-top"><div class="review-av" style="background:${colors[Math.floor(Math.random()*5)]}">${(r.name||'U')[0].toUpperCase()}</div><div><div class="review-name">${r.name||'User'}</div><div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div><span style="font-size:10px;color:var(--muted);margin-left:auto;">${r.time||''}</span></div><div class="review-txt">${r.comment||''}</div>`;
+    el.appendChild(d);
+  });
+}
+function openCallDetail(){ if(curSvc) openCallModal(curSvc.name,curSvc.ph||'N/A'); }
+function openBookDetail(){ if(curSvc) openBookModal(curSvc.name,curSvc.id); }
+function copyEmail(){ toast('📋 Copied: '+(curSvc?curSvc.em:'')); }
+function searchAddr(){
+  if(curSvc&&curSvc.addr){
+    const url='https://maps.google.com/maps?q='+encodeURIComponent(curSvc.addr)+'&output=embed';
+    document.getElementById('mapIframe').src=url;
+    goScreen('screen-map');
+  }
+}
+
+// ════════════════ CALL / BOOK MODALS ════════════════
+function openCallModal(name,num){
+  document.getElementById('cmName').textContent=name;
+  document.getElementById('cmNum').textContent=num;
+  openModal('callModal');
+}
+function dialCall(){
+  const num=document.getElementById('cmNum').textContent;
+  toast('📲 Dialling '+num+'...');
+  closeModal('callModal');
+}
+function openBookModal(name,id){
+  const cu=DB.getCurrentUser();
+  if(!cu||cu.role==='guest'){ toast('⚠️ Please login to book'); goScreen('screen-auth'); return; }
+  document.getElementById('bmSub').textContent='📍 '+name;
+  document.getElementById('bkName').value=cu.name||'';
+  document.getElementById('bkPhone').value=cu.phone||'';
+  document.getElementById('bkDate').value='';
+  document.getElementById('bkAddr').value='';
+  document.getElementById('bkNote').value='';
+  openModal('bookModal');
+  openModal._currentBookId=id;
+}
+openModal._currentBookId=null;
+function submitBook(){
+  const cu=DB.getCurrentUser(); if(!cu){ toast('⚠️ Login required'); return; }
+  const name=document.getElementById('bkName').value.trim();
+  const phone=document.getElementById('bkPhone').value.trim();
+  const date=document.getElementById('bkDate').value;
+  if(!name||!phone||!date){ toast('⚠️ Fill all required fields'); return; }
+  const svcs=DB.getServices(); const svcId=openModal._currentBookId;
+  const svc=svcs.find(s=>s.id===svcId);
+  const bks=DB.getBookings();
+  bks.push({
+    id:Date.now(), userId:cu.id, svcId,
+    svcName:svc?svc.name:'Service', svcCat:svc?svc.cat:'',
+    name, phone, date, addr:document.getElementById('bkAddr').value,
+    note:document.getElementById('bkNote').value,
+    status:'confirmed', createdAt:new Date().toLocaleDateString()
+  });
+  DB.saveBookings(bks);
+  closeModal('bookModal');
+  toast('✅ Booking confirmed!');
+  addNotif('📅','#dcfce7','Booking Confirmed','Your booking has been placed.','Just now');
+  updateProfileUI();
+}
+
+// ════════════════ RATING ════════════════
+function setRating(n){
+  selectedRating=n;
+  const stars=document.getElementById('starInput').children;
+  for(let i=0;i<5;i++) stars[i].textContent=i<n?'★':'☆';
+}
+function openRatingModal(){
+  const cu=DB.getCurrentUser();
+  if(!cu){ toast('⚠️ Login to write a review'); return; }
+  document.getElementById('rmSub').textContent=curSvc?curSvc.name:'';
+  document.getElementById('ratingComment').value='';
+  setRating(0);
+  openModal('ratingModal');
+}
+function submitRating(){
+  const cu=DB.getCurrentUser(); if(!cu)return;
+  if(!selectedRating){ toast('⭐ Please select a star rating'); return; }
+  const comment=document.getElementById('ratingComment').value.trim();
+  if(!comment){ toast('⚠️ Please write a comment'); return; }
+  const allRev=DB.getReviews();
+  if(!allRev[curSvc.id]) allRev[curSvc.id]=[];
+  allRev[curSvc.id].push({userId:cu.id,name:cu.name,rating:selectedRating,comment,time:'Just now'});
+  DB.saveReviews(allRev);
+  // Update avg rating in service
+  const svcs=DB.getServices(); const s=svcs.find(x=>x.id===curSvc.id);
+  if(s){ const revs=allRev[curSvc.id]; s.rat=parseFloat((revs.reduce((a,r)=>a+r.rating,0)/revs.length).toFixed(1)); }
+  DB.saveServices(svcs);
+  closeModal('ratingModal'); renderDetailReviews();
+  toast('⭐ Review submitted! Thank you.');
+}
+
+// ════════════════ MY BOOKINGS ════════════════
+function renderMyBookings(){
+  const cu=DB.getCurrentUser();
+  const el=document.getElementById('myBookingsList'); if(!el)return;
+  if(!cu){ el.innerHTML='<div class="empty-state"><div class="e-icon">🔑</div><p>Login to view bookings</p></div>'; return; }
+  const bks=DB.getBookings().filter(b=>b.userId===cu.id);
+  if(!bks.length){ el.innerHTML='<div class="empty-state"><div class="e-icon">📅</div><p>No bookings yet</p></div>'; return; }
+  el.innerHTML='';
+  bks.slice().reverse().forEach(b=>{
+    const icon=CAT_ICONS[b.svcCat]||'🛎️', bg=CAT_BG[b.svcCat]||'#f3f4f6';
+    const sc={confirmed:'confirmed',pending:'pending-s',completed:'completed',cancelled:'cancelled'}[b.status]||'';
+    const d=document.createElement('div'); d.className='bk-card';
+    d.innerHTML=`
+      <div class="bk-top">
+        <div class="bk-icon" style="background:${bg}">${icon}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${b.svcName}</div><div style="font-size:11px;color:var(--muted);">${b.date||b.createdAt}</div></div>
+        <span class="bk-status ${sc}">${b.status}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">📍 ${b.addr||'—'} &nbsp;|&nbsp; 📞 ${b.phone}</div>
+      <div class="bk-acts">
+        ${b.status==='confirmed'?`<button style="background:var(--amber-light);color:#92400e;" onclick="cancelBk(${b.id})">Cancel</button>`:''}
+        ${b.status==='completed'?`<button style="background:var(--primary-light);color:var(--primary);" onclick="openDetail(${b.svcId})">Review</button>`:''}
+        <button style="background:var(--red-light);color:var(--red);" onclick="confirmDelete('booking','',${b.id})">Delete</button>
+      </div>`;
+    el.appendChild(d);
+  });
+}
+function cancelBk(id){
+  const bks=DB.getBookings(); const b=bks.find(x=>x.id===id);
+  if(b) b.status='cancelled'; DB.saveBookings(bks); renderMyBookings(); toast('❌ Booking cancelled');
+}
+function deleteBooking(id){
+  DB.saveBookings(DB.getBookings().filter(b=>b.id!==id)); renderMyBookings(); toast('🗑️ Deleted');
+}
+
+// ════════════════ SAVED ════════════════
 function renderSaved(){
-  const list=API.getSaved();
-  const el=document.getElementById("saved-body");
-  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#94a3b8">No saved services yet.<br>Tap ❤️ on any service to save it.</div>`;return;}
-  el.innerHTML=list.map(s=>serviceCard(s)).join("");
+  const el=document.getElementById('savedList'); if(!el)return;
+  el.innerHTML='<div class="empty-state"><div class="e-icon">⭐</div><p>No saved services yet<br><small>Tap ⭐ on a service to save it</small></p></div>';
 }
- 
-// ════════════════════════════════════════════════
-//  REVIEW MODAL
-// ════════════════════════════════════════════════
-function openReviewModal(){
-  modalRating=0;
-  document.getElementById("review-text").value="";
-  renderModalStars();
-  document.getElementById("review-modal").classList.add("open");
+
+// ════════════════ MY REVIEWS ════════════════
+function renderMyReviews(){
+  const cu=DB.getCurrentUser();
+  const el=document.getElementById('myReviewsList'); if(!el)return;
+  if(!cu){ el.innerHTML='<div class="empty-state"><div class="e-icon">🔑</div><p>Login to see your reviews</p></div>'; return; }
+  const allRev=DB.getReviews();
+  let found=[];
+  Object.keys(allRev).forEach(svcId=>{
+    const revs=allRev[svcId].filter(r=>r.userId===cu.id);
+    revs.forEach(r=>{
+      const svc=DB.getServices().find(s=>s.id===parseInt(svcId));
+      found.push({...r,svcName:svc?svc.name:'Service',svcCat:svc?svc.cat:''});
+    });
+  });
+  if(!found.length){ el.innerHTML='<div class="empty-state"><div class="e-icon">💬</div><p>No reviews yet</p></div>'; return; }
+  el.innerHTML='';
+  found.forEach(r=>{
+    const d=document.createElement('div'); d.className='bk-card';
+    d.innerHTML=`<div class="bk-top"><div class="bk-icon" style="background:${CAT_BG[r.svcCat]||'#f3f4f6'}">${CAT_ICONS[r.svcCat]||'🛎️'}</div><div style="flex:1"><div style="font-size:13px;font-weight:700;">${r.svcName}</div><div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div></div><div style="font-size:12px;color:var(--muted);">${r.comment}</div>`;
+    el.appendChild(d);
+  });
 }
-function closeReviewModal(){
-  document.getElementById("review-modal").classList.remove("open");
+
+// ════════════════ OFFERS ════════════════
+function renderOffers(){
+  const el=document.getElementById('offersList'); if(!el)return;
+  el.innerHTML='';
+  OFFERS.forEach(o=>{
+    const d=document.createElement('div'); d.className='offer-card';
+    d.innerHTML=`<div class="offer-emoji">${o.e}</div><div style="flex:1"><div style="font-size:13px;font-weight:700;">${o.t}</div><div style="font-size:11px;color:var(--muted);">${o.s}</div><div style="font-size:11px;font-weight:800;color:var(--primary);margin-top:3px;">Code: ${o.c}</div></div><button class="use-btn" onclick="toast('🎉 Code ${o.c} copied!')">Use</button>`;
+    el.appendChild(d);
+  });
 }
-function renderModalStars(){
-  document.getElementById("modal-stars").innerHTML=[1,2,3,4,5].map(i=>
-    `<span class="modal-star${i<=modalRating?' active':''}" onclick="setModalRating(${i})">★</span>`
-  ).join("");
+
+// ════════════════ EDIT PROFILE ════════════════
+function prefillEditProfile(){
+  const cu=DB.getCurrentUser(); if(!cu)return;
+  document.getElementById('epName').value=cu.name||'';
+  document.getElementById('epPhone').value=cu.phone||'';
+  document.getElementById('epEmail').value=cu.email||'';
 }
-function setModalRating(r){
-  modalRating=r;
-  renderModalStars();
+function saveProfile(){
+  const cu=DB.getCurrentUser(); if(!cu){toast('⚠️ Not logged in');return;}
+  cu.name=document.getElementById('epName').value.trim()||cu.name;
+  cu.phone=document.getElementById('epPhone').value.trim()||cu.phone;
+  cu.email=document.getElementById('epEmail').value.trim()||cu.email;
+  cu.city=document.getElementById('epCity').value||cu.city;
+  DB.setCU(cu);
+  const users=DB.getUsers(); const idx=users.findIndex(u=>u.id===cu.id);
+  if(idx>=0){users[idx]={...users[idx],...cu};DB.saveUsers(users);}
+  updateProfileUI(); closeSP('sp-editprofile'); toast('✅ Profile updated!');
 }
-function submitReview(){
-  if(!currentSvc||!modalRating) return;
-  const text=document.getElementById("review-text").value.trim();
-  if(!text) return;
-  API.addReview(currentSvc.id,{rating:modalRating,text});
-  closeReviewModal();
-  renderReviewsTab(currentSvc);
-  renderDetail(currentSvc);
-  switchTab(2);
+
+// ════════════════ PROVIDER ════════════════
+function renderProvider(){
+  const cu=DB.getCurrentUser(); if(!cu||cu.role!=='provider')return;
+  const svcs=DB.getServices().filter(s=>s.ownerId===cu.id);
+  const bks=DB.getBookings().filter(b=>svcs.some(s=>s.id===b.svcId));
+  const statsEl=document.getElementById('provStats');
+  statsEl.innerHTML=`
+    <div class="stat-card"><div class="stat-num">${svcs.length}</div><div class="stat-lbl">Listings</div></div>
+    <div class="stat-card"><div class="stat-num">${bks.length}</div><div class="stat-lbl">Bookings</div></div>
+    <div class="stat-card"><div class="stat-num">${svcs.filter(s=>s.status==='approved').length}</div><div class="stat-lbl">Live</div></div>
+    <div class="stat-card"><div class="stat-num">${svcs.filter(s=>s.status==='pending').length}</div><div class="stat-lbl">Pending</div></div>`;
+  const banner=document.getElementById('provStatusBanner');
+  const pending=svcs.filter(s=>s.status==='pending');
+  if(pending.length){banner.textContent='⏳ '+pending.length+' listing(s) awaiting admin approval';banner.style.background='var(--amber-light)';banner.style.color='#92400e';}
+  else{banner.textContent='✅ All listings are live!';banner.style.background='var(--green-light)';banner.style.color='var(--green)';}
+  const listEl=document.getElementById('provListings'); listEl.innerHTML='';
+  if(!svcs.length){listEl.innerHTML='<div class="empty-state"><div class="e-icon">🏪</div><p>No listings yet. Add one!</p></div>';return;}
+  svcs.forEach(s=>{
+    const d=document.createElement('div');d.className='bk-card';
+    const sc={approved:'confirmed',pending:'pending-s',rejected:'cancelled'}[s.status]||'';
+    d.innerHTML=`<div class="bk-top"><div class="bk-icon" style="background:${CAT_BG[s.cat]||'#f3f4f6'}">${CAT_ICONS[s.cat]||'🛎️'}</div><div style="flex:1"><div style="font-size:13px;font-weight:700;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.city}</div></div><span class="bk-status ${sc}">${s.status}</span></div>
+    <div class="bk-acts"><button style="background:var(--primary-light);color:var(--primary);" onclick="editProviderSvc(${s.id})">Edit</button><button style="background:var(--red-light);color:var(--red);" onclick="confirmDelete('listing','',${s.id})">Delete</button></div>`;
+    listEl.appendChild(d);
+  });
+  const bkEl=document.getElementById('provBookings'); bkEl.innerHTML='';
+  if(!bks.length){bkEl.innerHTML='<div class="empty-state"><div class="e-icon">📅</div><p>No bookings yet</p></div>';return;}
+  bks.slice().reverse().forEach(b=>{
+    const d=document.createElement('div');d.className='bk-card';
+    d.innerHTML=`<div class="bk-top"><div class="bk-icon" style="background:${CAT_BG[b.svcCat]||'#f3f4f6'}">${CAT_ICONS[b.svcCat]||'🛎️'}</div><div style="flex:1"><div style="font-size:12px;font-weight:700;">${b.svcName}</div><div style="font-size:11px;color:var(--muted);">By ${b.name} · ${b.phone}</div></div><span class="bk-status confirmed">${b.status}</span></div>`;
+    d.onclick=()=>toast('📅 '+b.name+' · '+b.date);
+    bkEl.appendChild(d);
+  });
 }
- 
-// ════════════════════════════════════════════════
-//  UTILS
-// ════════════════════════════════════════════════
-function callService(phone){
-  alert(`📞 Calling ${phone}...\n(In production this triggers tel: link)`);
+function prepAddService(){
+  editingSvcId=null;
+  document.getElementById('addSvcTitle').textContent='Add Listing';
+  ['asBizName','asBizAddr','asBizPhone','asBizEmail','asBizHours','asBizPrice','asBizDesc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
 }
-function whatsapp(phone){
-  alert(`💬 Opening WhatsApp for ${phone}...`);
+function editProviderSvc(id){
+  const s=DB.getServices().find(x=>x.id===id); if(!s)return;
+  editingSvcId=id;
+  document.getElementById('addSvcTitle').textContent='Edit Listing';
+  document.getElementById('asBizName').value=s.name||'';
+  document.getElementById('asBizCat').value=s.cat||'food';
+  document.getElementById('asBizCity').value=s.city||'Jamshedpur';
+  document.getElementById('asBizAddr').value=s.addr||'';
+  document.getElementById('asBizPhone').value=s.ph||'';
+  document.getElementById('asBizEmail').value=s.em||'';
+  document.getElementById('asBizHours').value=s.hrs||'';
+  document.getElementById('asBizPrice').value=s.price||'';
+  document.getElementById('asBizDesc').value=s.about||'';
+  openSP('sp-addservice');
 }
- 
-// ════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════
-renderCategories();
-renderServices(API.getAllServices());
+function saveProviderService(){
+  const cu=DB.getCurrentUser(); if(!cu||cu.role!=='provider'){toast('⚠️ Provider login required');return;}
+  const name=document.getElementById('asBizName').value.trim();
+  const addr=document.getElementById('asBizAddr').value.trim();
+  if(!name||!addr){toast('⚠️ Name and address required');return;}
+  const svcs=DB.getServices();
+  if(editingSvcId){
+    const s=svcs.find(x=>x.id===editingSvcId);
+    if(s){
+      s.name=name; s.cat=document.getElementById('asBizCat').value;
+      s.city=document.getElementById('asBizCity').value; s.addr=addr;
+      s.ph=document.getElementById('asBizPhone').value; s.em=document.getElementById('asBizEmail').value;
+      s.hrs=document.getElementById('asBizHours').value; s.price=document.getElementById('asBizPrice').value;
+      s.about=document.getElementById('asBizDesc').value;
+      s.desc=document.getElementById('asBizDesc').value.substring(0,55)||name;
+      s.status='pending'; s.ver=false;
+    }
+    toast('✅ Updated! Pending re-approval.');
+  }else{
+    const newS={
+      id:Date.now(), name, cat:document.getElementById('asBizCat').value,
+      city:document.getElementById('asBizCity').value, ver:false, rat:0, dist:'?',
+      desc:document.getElementById('asBizDesc').value.substring(0,55)||name,
+      ph:document.getElementById('asBizPhone').value, em:document.getElementById('asBizEmail').value,
+      addr, hrs:document.getElementById('asBizHours').value,
+      price:document.getElementById('asBizPrice').value||'Contact',
+      about:document.getElementById('asBizDesc').value||'',
+      status:'pending', ownerId:cu.id
+    };
+    svcs.push(newS);
+    toast('✅ Listing submitted for approval!');
+  }
+  DB.saveServices(svcs); closeSP('sp-addservice'); renderProvider();
+}
+
+// ════════════════ ADMIN ════════════════
+function renderAdmin(){
+  const cu=DB.getCurrentUser(); if(!cu||cu.role!=='admin')return;
+  const svcs=DB.getServices(); const users=DB.getUsers(); const bks=DB.getBookings();
+  document.getElementById('adminStats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-lbl">Users</div></div>
+    <div class="stat-card"><div class="stat-num">${svcs.filter(s=>s.status==='approved').length}</div><div class="stat-lbl">Live Services</div></div>
+    <div class="stat-card"><div class="stat-num">${svcs.filter(s=>s.status==='pending').length}</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat-card"><div class="stat-num">${bks.length}</div><div class="stat-lbl">Bookings</div></div>`;
+
+  // PENDING
+  const pendEl=document.getElementById('pendingList'); pendEl.innerHTML='';
+  const pending=svcs.filter(s=>s.status==='pending');
+  if(!pending.length) pendEl.innerHTML='<div class="empty-state"><div class="e-icon">✅</div><p>No pending approvals</p></div>';
+  else pending.forEach(s=>{
+    const d=document.createElement('div'); d.className='admin-card';
+    d.innerHTML=`<div class="admin-row"><div class="bk-icon" style="background:${CAT_BG[s.cat]||'#f3f4f6'};width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">${CAT_ICONS[s.cat]||'🛎️'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.city} · ${s.cat}</div></div><div class="admin-acts"><button class="approve-btn" onclick="adminApprove(${s.id})">✅</button><button class="reject-btn" onclick="adminReject(${s.id})">❌</button></div></div>`;
+    pendEl.appendChild(d);
+  });
+
+  // USERS
+  const usrEl=document.getElementById('adminUsers'); usrEl.innerHTML='';
+  const regUsers=users.filter(u=>u.role==='user');
+  if(!regUsers.length) usrEl.innerHTML='<div class="empty-state"><div class="e-icon">👥</div><p>No users yet</p></div>';
+  else{const d=document.createElement('div');d.className='admin-card';regUsers.forEach(u=>{const row=document.createElement('div');row.className='admin-row';row.innerHTML=`<div style="width:30px;height:30px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">👤</div><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;">${u.name}</div><div style="font-size:10px;color:var(--muted);">${u.email}</div></div><div class="admin-acts"><button class="${u.suspended?'approve-btn':'reject-btn'}" onclick="adminToggleSuspend(${u.id})">${u.suspended?'↩️':'🚫'}</button><button class="delete-btn" onclick="confirmDelete('user','',${u.id})">🗑️</button></div>`;d.appendChild(row);});usrEl.appendChild(d);}
+
+  // PROVIDERS
+  const prvEl=document.getElementById('adminProviders'); prvEl.innerHTML='';
+  const provUsers=users.filter(u=>u.role==='provider');
+  if(!provUsers.length) prvEl.innerHTML='<div class="empty-state"><div class="e-icon">🏪</div><p>No providers yet</p></div>';
+  else{const d=document.createElement('div');d.className='admin-card';provUsers.forEach(u=>{const row=document.createElement('div');row.className='admin-row';row.innerHTML=`<div style="width:30px;height:30px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🏪</div><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;">${u.name}</div><div style="font-size:10px;color:var(--muted);">${u.email}</div></div><div class="admin-acts"><button class="${u.suspended?'approve-btn':'reject-btn'}" onclick="adminToggleSuspend(${u.id})">${u.suspended?'↩️':'🚫'}</button><button class="delete-btn" onclick="confirmDelete('user','',${u.id})">🗑️</button></div>`;d.appendChild(row);});prvEl.appendChild(d);}
+
+  // ALL SERVICES
+  const asEl=document.getElementById('adminServices'); asEl.innerHTML='';
+  if(!svcs.length){asEl.innerHTML='<div class="empty-state"><div class="e-icon">🛎️</div><p>No services</p></div>';}
+  else{const d=document.createElement('div');d.className='admin-card';svcs.forEach(s=>{const sc={approved:'chip-approved',pending:'chip-pending',rejected:'chip-rejected'}[s.status]||'';const row=document.createElement('div');row.className='admin-row';row.innerHTML=`<div style="font-size:20px;flex-shrink:0;">${CAT_ICONS[s.cat]||'🛎️'}</div><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;">${s.name}</div><div style="font-size:10px;color:var(--muted);">${s.city} · <span class="status-chip ${sc}">${s.status}</span></div></div><div class="admin-acts">${s.status!=='approved'?`<button class="approve-btn" onclick="adminApprove(${s.id})">✅</button>`:''}<button class="delete-btn" onclick="confirmDelete('service','',${s.id})">🗑️</button></div>`;d.appendChild(row);});asEl.appendChild(d);}
+}
+function adminApprove(id){
+  const svcs=DB.getServices(); const s=svcs.find(x=>x.id===id);
+  if(s){s.status='approved';s.ver=true;} DB.saveServices(svcs); renderAdmin(); toast('✅ Business approved & live!');
+  addNotif('✅','#dcfce7','Approved','A provider listing is now live.','Just now');
+}
+function adminReject(id){
+  const svcs=DB.getServices(); const s=svcs.find(x=>x.id===id);
+  if(s){s.status='rejected';s.ver=false;} DB.saveServices(svcs); renderAdmin(); toast('❌ Listing rejected');
+}
+function adminSuspend(id){
+  const svcs=DB.getServices(); const s=svcs.find(x=>x.id===id);
+  if(s){s.status='pending';s.ver=false;} DB.saveServices(svcs); renderAdmin(); toast('⏸️ Suspended');
+}
+function adminToggleSuspend(uid){
+  const users=DB.getUsers(); const u=users.find(x=>x.id===uid);
+  if(u){u.suspended=!u.suspended;} DB.saveUsers(users);
+  const cu=DB.getCurrentUser(); if(cu&&cu.id===uid){cu.suspended=u.suspended;DB.setCU(cu);}
+  renderAdmin(); toast(u&&u.suspended?'🚫 User suspended':'✅ User restored');
+}
+function adminDeleteUser(uid){
+  DB.saveUsers(DB.getUsers().filter(u=>u.id!==uid)); renderAdmin(); toast('🗑️ User deleted');
+}
+function adminDeleteService(id){
+  DB.saveServices(DB.getServices().filter(s=>s.id!==id)); renderAdmin(); toast('🗑️ Service deleted');
+}
+
+// ════════════════ CONFIRM ════════════════
+function confirmDelete(type,fnName,id){
+  const titles={listing:'Delete Listing',service:'Delete Service',user:'Delete User',booking:'Delete Booking',account:'Delete Account'};
+  document.getElementById('confirmTitle').textContent=titles[type]||'Are you sure?';
+  document.getElementById('confirmMsg').textContent='This action cannot be undone.';
+  const okBtn=document.getElementById('confirmOkBtn');
+  okBtn.onclick=()=>{
+    closeConfirm();
+    if(type==='listing'||type==='service') adminDeleteService(id);
+    else if(type==='user') adminDeleteUser(id);
+    else if(type==='booking') deleteBooking(id);
+    else if(type==='account') deleteMyAccount();
+  };
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); }
+function deleteMyAccount(){
+  const cu=DB.getCurrentUser(); if(!cu)return;
+  DB.saveUsers(DB.getUsers().filter(u=>u.id!==cu.id));
+  DB.clearCU(); updateProfileUI(); closeSP('sp-settings'); goScreen('screen-home');
+  toast('🗑️ Account deleted');
+}
+
+// ════════════════ NOTIFICATIONS ════════════════
+function refreshBadge(){
+  const notifs=DB.getNotifs();
+  document.getElementById('notifBadge').style.display=notifs.some(n=>n.unread)?'block':'none';
+}
+function openNotifs(){
+  const notifs=DB.getNotifs();
+  notifs.forEach(n=>n.unread=false); DB.saveNotifs(notifs);
+  renderNotifs(); openPanel('notifPanel'); refreshBadge();
+}
+function renderNotifs(){
+  const el=document.getElementById('notifList'); if(!el)return;
+  const notifs=DB.getNotifs(); el.innerHTML='';
+  if(!notifs.length){ el.innerHTML='<div class="empty-state"><div class="e-icon">🔔</div><p>No notifications</p></div>'; return; }
+  notifs.forEach(n=>{
+    const d=document.createElement('div'); d.className='notif-item'+(n.unread?' unread':'');
+    d.innerHTML=`<div class="n-icon" style="background:${n.bg}">${n.icon}</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text);">${n.t}</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">${n.s}</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">${n.time}</div></div>`;
+    el.appendChild(d);
+  });
+}
+function addNotif(icon,bg,title,sub,time){
+  const notifs=DB.getNotifs();
+  notifs.unshift({icon,bg,t:title,s:sub,time,unread:true});
+  DB.saveNotifs(notifs); refreshBadge();
+}
+function clearNotifs(){ DB.saveNotifs([]); renderNotifs(); toast('🔔 Cleared'); }
+
+// ════════════════ MAP ════════════════
+function searchOnMap(){
+  const q=document.getElementById('mapSearchInput').value.trim();
+  if(!q)return;
+  document.getElementById('mapIframe').src='https://maps.google.com/maps?q='+encodeURIComponent(q+', Jharkhand')+'&output=embed';
+  toast('📍 Searching: '+q);
+}
+
+// ════════════════ TOAST ════════════════
+let tTimer;
+function toast(msg){
+  clearTimeout(tTimer);
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toast').classList.add('show');
+  tTimer=setTimeout(()=>document.getElementById('toast').classList.remove('show'),2600);
+}
+
+// ════════════════ START ════════════════
+init();
 </script>
 </body>
 </html>
